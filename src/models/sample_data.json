@@ -1,0 +1,66 @@
+
+{
+    "user": {
+      "id": 0,
+      "name": "HI",
+      "email": "kp@gmail.com",
+      "password": "avada",
+      "auth": {
+          "token":"awerusdhof",
+          "session":"asdffawedf"
+              },
+      "investments":[1900,234234,231234],
+      "incomes":[1900,234234,231234],
+      "assets":[1900,234234,231234],
+      "liabilites":[1900,234234,231234],
+          },
+    "investment": {
+      "id":1900,
+      "name":"String",
+      "initial": 10000,
+      "increment": 1000,
+      "increment_frequency": 2,
+      "growth_rate": 2.3,
+      "compound_frequency": 12,
+      "start_date": "1627735402",
+      "end_date":"1627735402",
+      "current_value": 347234,
+      "maturity": 23406987,
+      "exit_load": "I-3%"
+    },
+    "asset": {
+      "id": 123425,
+      "name": "srew",
+      "type": "stock",
+      "aquired_date":"1627735402",
+      "aquired_value": 1000,
+      "current_value": 1200,
+      "growth_rate": 5.6
+    },
+    "income": {
+      "id":1200,
+      "month": "1627735402",
+      "name": "salary",
+      "gross": 13000,
+      "net": 11000
+    },
+    "expenditure": {
+      "id":120491304,
+      "month": "1627735402",
+      "name": "Total",
+      "amount": 1000
+    },
+    "liability": {
+      "id":1000000,
+      "name": "SBI Home",
+      "type": "Loan",
+      "intrest_rate": 9.9,
+      "compound_frequency": 12,
+      "amount": 700000,
+      "instalment": 10000,
+      "instalment_frequency":1,
+      "start_date": "1627735402",
+      "current_value": 60000,
+      "end_date": "1627735402"
+    }
+}

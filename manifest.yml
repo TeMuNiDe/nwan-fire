@@ -1,5 +1,5 @@
 ---
 applications:
- - name: GetStartedNode
+ - name: nwan-fire-server
    random-route: true
    memory: 256M

@@ -1,2 +1,6 @@
 vcap-local.json
 node_modules
+build*
+server*
+vcap*
+src/vcap*
