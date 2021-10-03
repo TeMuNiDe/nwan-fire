@@ -1,55 +1,47 @@
-import {Table} from './views/Table.js';
+import Home from './views/Home';
 import React,{Component} from 'react';
 import ReactDOM from 'react-dom';
-const table_data = {
-    
-    "head": [
-        "Start Time",
-        "Principal",
-        "Increment",
-        " Increment Frequency",
-        "Compounding Freqency"
-       ],
-       "data": [
-        [
-         "05/09/2020",
-         "10000",
-         "5000",
-         "1",
-         "3"
-        ],
-        [
-         "05/09/2021",
-         "20000",
-         "7500",
-         "6",
-         "12"
-        ],
-        [
-         "05/09/2021",
-         "15000",
-         "4000",
-         "3",
-         "12"
-        ]
-       ]
-}
+import {User} from './models/model'
+import CssBaseline from "@material-ui/core/CssBaseline";
 
+import { createTheme, ThemeProvider } from '@material-ui/core/styles';
+
+
+const theme = createTheme({
+    
+    palette: {
+        type: 'dark',
+        primary: {
+          main: '#13A8BA',
+        },
+        secondary: {
+          main: '#13ba77',
+        },
+        background: {
+          default: '#1a2034',
+          paper: '#202940',
+        },
+      }
+  });
+
+
+  
 class App extends React.Component{
     constructor(props) {
         super(props);
-        this.state = table_data;
+        this.state = {user:new User().toJSON()};
     }
-    componentDidMount () {
-        fetch ("http://localhost:3000/investments")
-        .then(res=>res.json())
-        .then((result)=>{
-            console.log(result);
-            this.setState(result)});
-         }
+
+    componentDidMount(){
+        this.setState({user:new User().toJSON()});
+    }
+
     render(){
-       return (<Table data={this.state}></Table>);
+
+       return <ThemeProvider theme={theme}>
+        <CssBaseline />
+       <Home user={this.state.user}/>
+       </ThemeProvider>;
     }
 }
-
 ReactDOM.render(<App/>,document.getElementById('root'));

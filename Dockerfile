@@ -2,7 +2,7 @@ FROM node:12-alpine
 
 ADD build /app/build
 ADD package.json /app
-ADD app.js /app
+ADD server /app/server
 
 RUN cd /app; npm install
 
