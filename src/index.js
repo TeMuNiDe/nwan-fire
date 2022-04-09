@@ -1,10 +1,10 @@
 import Home from './views/Home';
 import React,{Component} from 'react';
 import ReactDOM from 'react-dom';
-import {User} from './models/model'
 import CssBaseline from "@material-ui/core/CssBaseline";
 
 import { createTheme, ThemeProvider } from '@material-ui/core/styles';
+import { Typography } from '@material-ui/core';
 
 
 const theme = createTheme({
@@ -29,19 +29,27 @@ const theme = createTheme({
 class App extends React.Component{
     constructor(props) {
         super(props);
-        this.state = {user:new User().toJSON()};
+        this.state = {user:0};
     }
 
     componentDidMount(){
-        this.setState({user:new User().toJSON()});
+        fetch("http://localhost:3000/api/user/0")
+        .then(res=>res.json())
+        .then((result)=>{this.setState({user:result})})
+        .catch(e=>{console.log(e)});
+        
     }
 
     render(){
-
+      if(this.state.user!=0){
        return <ThemeProvider theme={theme}>
         <CssBaseline />
        <Home user={this.state.user}/>
        </ThemeProvider>;
+    } else {
+      return <Typography>Loading</Typography>;
     }
+
+  }
 }
 ReactDOM.render(<App/>,document.getElementById('root'));

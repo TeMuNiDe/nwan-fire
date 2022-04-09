@@ -1,16 +1,20 @@
 import React,{Component} from 'react';
-import {User} from '../models/model';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
+import Button from '@material-ui/core/Button';
+import NewProperty from './NewProperty';
+import { Dialog } from '@material-ui/core';
 
 import { withStyles } from '@material-ui/core/styles';
-import PropTypes from 'prop-types';
-import TablePagination from '@material-ui/core/TablePagination';
 import TableContainer from '@material-ui/core/TableContainer';
+import Accordion from '@material-ui/core/Accordion';
+import AccordionSummary from '@material-ui/core/AccordionSummary';
+import AccordionDetails from '@material-ui/core/AccordionDetails';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 
 const styles = theme => ({
     table: {
@@ -27,54 +31,65 @@ const styles = theme => ({
     
     constructor(props) {
         super(props);
-        this.state = {loaded:false,user:props.user,liabilities:null};
-    }
-    
-    componentDidMount() {
-        this.setState({loaded:true,liabilities:new User().getLiabilities()})
-    }
-
-    handleChangePage  (event, newPage) {
-        //TODO
-       };
+        this.state = {loaded:false,open:false,user:props.user,liabilities:null};
+        this.refresh = this.refresh.bind(this)
+      }
+      
+ 
+  
+      refresh() {
+        if(!this.state.loaded) {
+        fetch("http://localhost:3000/api/user/"+this.state.user.id+"/liabilities")
+        .then(res=>res.json())
+        .then((result)=>{this.setState({liabilities:result,loaded:true})}).catch(e=>{console.log(e)});
+        }
+      }
+  
        
-        handleChangeRowsPerPage (event)  {
-         //TODO
-       };
        
     render() {
-
-
         const {classes} = this.props;
-        if(this.state.loaded){
-        let html =  <TableContainer> <Table size="small" className={classes.table}>
+        if(this.state.liabilities!=null){
+        let html = <Accordion TransitionProps={{ unmountOnExit: true }} onChange={this.refresh}><AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+        <Typography>Liabilites</Typography><Typography>Current{this.props.user.liabilities.current_value} </Typography>
+        <Typography>5 year Projection{this.props.user.liabilities["5y_value"] }</Typography>
+        <Typography>10 year Projection{this.props.user.liabilities["10y_value"]} </Typography>
+        </AccordionSummary>
+        <AccordionDetails> <TableContainer> <Table size="small" className={classes.table}>
           <TableHead className={classes.thead}>
             <TableRow>
               {Object.keys(this.state.liabilities[0]).map((key)=>(
-                  <TableCell>{key}</TableCell>
+                  <TableCell key={key}>{key}</TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
-        {this.state.liabilities.map( (liabilities)=> (
-          <TableRow>
-              {Object.values(liabilities).map((value)=>(<TableCell>{value}</TableCell>))};
+        {this.state.liabilities.map( (liability,index)=> (
+          <TableRow key={index}>
+              {Object.keys(this.state.liabilities[0]).map((key)=>(<TableCell key={key}>{liability[key]}</TableCell>))}
           </TableRow>
         ))}
+          <TableRow>
+          <TableCell><Button  variant="outlined" onClick={(e)=>{this.setState({open:true})}}>Add</Button></TableCell>
+        </TableRow>
         </TableBody>
       </Table>
-      <TablePagination
-      rowsPerPageOptions={[5, 10, 25]}
-      component="div"
-      count={this.state.liabilities.length}
-      rowsPerPage={5} 
-      page={0}
-      onPageChange={this.handleChangePage}
-      onRowsPerPageChange={this.handleChangeRowsPerPage}
-    />
-    </TableContainer>
+      <Dialog open={this.state.open} onClose={(e)=>{this.setState({open:false})}}>
+          <NewProperty onSuccess={()=>{this.setState({loaded:false});this.refresh()}} data="liability" keys={Object.keys(this.state.liabilities[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"})}></NewProperty>
+          </Dialog>
+    </TableContainer> </AccordionDetails></Accordion>  
       return html ;
-    } else return <Typography>Loading</Typography>     
+    } else { 
+    
+    let html = <Accordion TransitionProps={{ unmountOnExit: true }} onChange={this.refresh}><AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
+    <Typography>Liabilites</Typography><Typography>Current{this.props.user.liabilities.current_value} </Typography>
+    <Typography>5 year Projection{this.props.user.liabilities["5y_value"] }</Typography>
+    <Typography>10 year Projection{this.props.user.liabilities["10y_value"]} </Typography>
+    </AccordionSummary>
+    <AccordionDetails ><Typography>Loading</Typography></AccordionDetails></Accordion>  
+    return html;  
+      
+    }
     }
  }
  export default withStyles(styles)(Liabilities);

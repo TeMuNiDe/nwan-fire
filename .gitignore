@@ -4,3 +4,8 @@ build*
 server*
 vcap*
 src/vcap*
+.env
+.storybook
+.vs
+.ibm-project
+2.3.3

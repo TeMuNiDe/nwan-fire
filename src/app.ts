@@ -2,13 +2,16 @@
 import express, { Router } from 'express';
 import path from 'path';
 import cors from 'cors';
-import RouteManger from './controllers/routes';
+import RouteManager from './controllers/routes';
 
 var app:express.Application = express();
+
+/*
 var corsOptions = {
   origin: 'http://localhost:3001',
   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
 }
+*/
 
 //const dbManager = new DBManager();
 /* app.get("/init",function (req,res) {
@@ -25,9 +28,12 @@ app.get("/investments",cors(corsOptions),function (req,res) {
 });
  */
 
-
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })) 
 app.use(express.static(path.join(path.resolve(),'/build')));
-app.use('/api',cors(),new RouteManger().getApiRouter());
+//var apiRouter:Router = new RouteManager().getApiRouter();
+app.use('/api',cors(),new RouteManager().getApiRouter());
+//app.use('/api',cors(),apiRouter);
 
 
 app.get('*', function(req, res){
