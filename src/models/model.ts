@@ -19,8 +19,8 @@ class UserManager {
             //console.log("Main Loop");
             //console.log(investment);
             investments[index].current_value = CalcUtils.calculateInvestmnetForTerm(investment,"current");
-            investments[index].y5_value = CalcUtils.calculateInvestmnetForTerm(investment,"y5");
-            investments[index].y10_value = CalcUtils.calculateInvestmnetForTerm(investment,"y10");
+            investments[index]["5y_value"] = CalcUtils.calculateInvestmnetForTerm(investment,"y5");
+            investments[index]["10y_value"] = CalcUtils.calculateInvestmnetForTerm(investment,"y10");
             investments[index].maturity = CalcUtils.calculateInvestmnetForTerm(investment,"maturity");
 
     });
@@ -43,7 +43,19 @@ class UserManager {
     }
    async getLiabilities(user:number) {
         let liabilities = await this.db_manager.getUserProperty("liability",user); 
-        if (liabilities) {return liabilities} else  {return []}
+        if (liabilities) {
+            liabilities.forEach((liability:any,index:number)=>{
+                //console.log("Main Loop");
+                //console.log(investment);
+                liabilities[index].current_value = CalcUtils.calculateLiabilityBalance(liability,"current");
+                liabilities[index]["5y_value"] = CalcUtils.calculateLiabilityBalance(liability,"y5");
+                liabilities[index]["10y_value"] = CalcUtils.calculateLiabilityBalance(liability,"y10");    
+        });
+            
+          return liabilities;
+        } else  {
+            return [];
+        }
     }
 
  
@@ -175,9 +187,9 @@ class PropertyManager {
                             let y5_value = 0;
                             let y10_value = 0;
                             liabilities.forEach((liability:any)=>{
-                                current_value += liability.current_value;
-                                y5_value += CalcUtils.calculateSteadyGrowth(liability,"y5");
-                                y10_value += CalcUtils.calculateSteadyGrowth(liability,"y10");
+                                current_value += liability.calculateLiabilityBalance(liability,"current");
+                                y5_value += CalcUtils.calculateLiabilityBalance(liability,"y5");
+                                y10_value += CalcUtils.calculateLiabilityBalance(liability,"y10");
                             });
                             user_doc.liabilities.current_value = current_value;
                             user_doc.liabilities["5y_value"] = y5_value;
@@ -222,7 +234,7 @@ static  calculateLiabilityBalance(liability:any,term:string) {
     for(let i=0;i<term_months;i++) {
         let interest = balance*liability.growth_rate/1200;
         balance += interest;
-        if(i%liability.instalment_frequency) {
+        if(i%liability.installment_frequency==0) {
             balance-=liability.installment;
         }
         if(balance<=0) {break};
