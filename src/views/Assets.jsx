@@ -5,11 +5,14 @@ import TableCell from '@material-ui/core/TableCell';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
+import EditSharpIcon from '@material-ui/icons/EditSharp';
 
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import Button from '@material-ui/core/Button';
 import NewProperty from './NewProperty';
+import EditProperty from './EditProperty';
+
 import { Dialog } from '@material-ui/core';
 
 import TableContainer from '@material-ui/core/TableContainer';
@@ -34,7 +37,7 @@ class Assets extends React.Component {
     
     constructor(props) {
         super(props);
-        this.state = {loaded:false,open:false,user:props.user,assets:null,open:false};
+        this.state = {loaded:false,open:false,open_edit:false,user:props.user,assets:null,open:false};
         this.refresh = this.refresh.bind(this)
       }
   
@@ -59,15 +62,19 @@ class Assets extends React.Component {
         <AccordionDetails><TableContainer> <Table size="small" className={classes.table}>
           <TableHead className={classes.thead}>
             <TableRow>
-              {Object.keys(this.state.assets[0]).map((key)=>(
+              <TableCell></TableCell>
+              {Object.keys(this.state.assets[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"}).map((key)=>(
                   <TableCell key={key}>{key}</TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
         {this.state.assets.map( (asset,index)=> (
-          <TableRow key={index} >
-              {Object.keys(this.state.assets[0]).map((key)=>(<TableCell key={key}>{asset[key]}</TableCell>))}
+          <TableRow key={index} onMouseEnter={()=>{this.setState({hover:index})}}  onMouseLeave={()=>{this.setState({hover:null})}} >
+            <TableCell><span style={{visibility:this.state.hover==index?"visible":"hidden"}}>
+                <EditSharpIcon onClick={()=>{this.setState({open_edit:true,edit_object:asset})}} fontSize="small"></EditSharpIcon></span></TableCell>
+              {Object.keys(asset).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"}).map((key)=>(<TableCell key={key}>{asset[key]}</TableCell>))}
+              
           </TableRow>
         ))}
         <TableRow>
@@ -79,6 +86,9 @@ class Assets extends React.Component {
       </Table>
       <Dialog open={this.state.open} onClose={(e)=>{this.setState({open:false})}}>
           <NewProperty onSuccess={()=>{this.setState({loaded:false});this.refresh()}} data="asset" keys={Object.keys(this.state.assets[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"})}></NewProperty>
+          </Dialog>
+          <Dialog open={this.state.open_edit} onClose={(e)=>{this.setState({open_edit:false})}}>
+          <EditProperty onSuccess={()=>{this.setState({loaded:false});this.refresh();this.setState({open_edit:false})}} object={this.state.edit_object} ></EditProperty>
           </Dialog>
  
     </TableContainer></AccordionDetails></Accordion>

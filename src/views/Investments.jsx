@@ -8,6 +8,9 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import NewProperty from './NewProperty';
+import EditProperty from './EditProperty';
+
+import EditSharpIcon from '@material-ui/icons/EditSharp';
 
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
@@ -37,7 +40,7 @@ class Investments extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {loaded:false,open:false,user:props.user,investments:null};
+        this.state = {loaded:false,open:false,open_edit:false,user:props.user,investments:null};
         this.refresh = this.refresh.bind(this)
     }
     
@@ -63,15 +66,18 @@ class Investments extends React.Component {
         <AccordionDetails><TableContainer><Table size="small" className={classes.table}>
           <TableHead className={classes.thead}>
             <TableRow>
-              {Object.keys(this.state.investments[0]).map((key)=>(
+              <TableCell></TableCell>
+              {Object.keys(this.state.investments[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"}).map((key)=>(
                   <TableCell key={key}>{key}</TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
         {this.state.investments.map( (investment,index)=> (
-          <TableRow key={index}>
-              {Object.keys(this.state.investments[0]).map((key)=>(<TableCell key={key} >{investment[key]}</TableCell>))}
+          <TableRow key={index} onMouseEnter={()=>{this.setState({hover:index})}}  onMouseLeave={()=>{this.setState({hover:null})}}>
+            <TableCell><span style={{visibility:this.state.hover==index?"visible":"hidden"}}>
+                <EditSharpIcon onClick={()=>{this.setState({open_edit:true,edit_object:investment})}} fontSize="small"></EditSharpIcon></span></TableCell>
+              {Object.keys(investment).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"}).map((key)=>(<TableCell key={key} >{investment[key]}</TableCell>))}
           </TableRow>
         ))}
           <TableRow>
@@ -83,6 +89,9 @@ class Investments extends React.Component {
       </Table>
       <Dialog open={this.state.open} onClose={(e)=>{this.setState({open:false})}}>
           <NewProperty onSuccess={()=>{this.setState({loaded:false});this.refresh()}} data="investment" keys={Object.keys(this.state.investments[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"})}></NewProperty>
+          </Dialog>
+          <Dialog open={this.state.open_edit} onClose={(e)=>{this.setState({open_edit:false})}}>
+          <EditProperty onSuccess={()=>{this.setState({loaded:false});this.refresh();this.setState({open_edit:false})}} object={this.state.edit_object} ></EditProperty>
           </Dialog>
     </TableContainer></AccordionDetails></Accordion>
       return html ;

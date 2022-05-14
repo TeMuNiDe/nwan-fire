@@ -8,6 +8,9 @@ import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import NewProperty from './NewProperty';
+import EditProperty from './EditProperty';
+import EditSharpIcon from '@material-ui/icons/EditSharp';
+
 import { Dialog } from '@material-ui/core';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -34,7 +37,7 @@ class Expenditures extends React.Component {
     
     constructor(props) {
         super(props);
-        this.state = {loaded:false,open:false,user:props.user,expenditures:null};
+        this.state = {loaded:false,open:false,open_edit:false,user:props.user,expenditures:null};
         this.refresh = this.refresh.bind(this)
       }
       
@@ -69,10 +72,12 @@ class Expenditures extends React.Component {
           </TableRow>
         </TableHead>
         <TableBody>
-        {this.state.expenditures.index.names.map( (name)=> (
+        {this.state.expenditures.index.names.map( (name,index_name)=> (
           <TableRow key={name}><TableCell>{name}</TableCell>
             {this.state.expenditures.data.filter(item=>item.name==name).map((item,index) => (
-              <TableCell key={index}>{item.net}</TableCell>
+              <TableCell key={index} onMouseEnter={()=>{this.setState({hover:index_name+"_"+index})}}  onMouseLeave={()=>{this.setState({hover:null})}}  >{item.net}
+              <span style={{visibility:this.state.hover==index_name+"_"+index?"visible":"hidden"}}>
+                <EditSharpIcon onClick={()=>{this.setState({open_edit:true,edit_object:item})}} fontSize="small"></EditSharpIcon></span></TableCell>
             ))}
           </TableRow>
         ))}
@@ -84,6 +89,9 @@ class Expenditures extends React.Component {
       </Table>
       <Dialog open={this.state.open} onClose={(e)=>{this.setState({open:false})}}>
           <NewProperty onSuccess={()=>{this.setState({loaded:false});this.refresh()}} data="expenditure" keys={Object.keys(this.state.expenditures.data[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"})}></NewProperty>
+          </Dialog>
+          <Dialog open={this.state.open_edit} onClose={(e)=>{this.setState({open_edit:false})}}>
+          <EditProperty onSuccess={()=>{this.setState({loaded:false});this.refresh();this.setState({open_edit:false})}} object={this.state.edit_object} ></EditProperty>
           </Dialog>
     </TableContainer></AccordionDetails></Accordion>
       return html ;

@@ -7,8 +7,9 @@ import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import NewProperty from './NewProperty';
+import EditProperty from './EditProperty';
 import { Dialog } from '@material-ui/core';
-
+import EditSharpIcon from '@material-ui/icons/EditSharp';
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
 import TablePagination from '@material-ui/core/TablePagination';
@@ -31,7 +32,7 @@ class Incomes extends React.Component {
     
     constructor(props) {
         super(props);
-        this.state = {loaded:false,open:false,user:props.user,incomes:null};
+        this.state = {loaded:false,open_new:false,open_edit:false,user:props.user,incomes:null};
         this.refresh = this.refresh.bind(this)
       }
       
@@ -65,21 +66,26 @@ class Incomes extends React.Component {
           </TableRow>
         </TableHead>
         <TableBody>
-        {this.state.incomes.index.names.map( (name)=> (
+        {this.state.incomes.index.names.map( (name,index_name)=> (
           <TableRow key={name}><TableCell>{name}</TableCell>
             {this.state.incomes.data.filter(item=>item.name==name).map((item,index) => (
-              <TableCell key={index}>{item.net}</TableCell>
+              <TableCell key={index} onMouseEnter={()=>{this.setState({hover:index_name+"_"+index})}}  onMouseLeave={()=>{this.setState({hover:null})}} >{item.net}
+              <span style={{visibility:this.state.hover==index_name+"_"+index?"visible":"hidden"}}>
+                <EditSharpIcon onClick={()=>{this.setState({open_edit:true,edit_object:item})}} fontSize="small"></EditSharpIcon></span></TableCell>
             ))}
           </TableRow>
         ))}
              <TableRow>
-          <TableCell><Button  variant="outlined" onClick={(e)=>{this.setState({open:true})}}>Add</Button>
+          <TableCell><Button  variant="outlined" onClick={(e)=>{this.setState({open_new:true})}}>Add</Button>
 </TableCell>
         </TableRow>
         </TableBody>
       </Table>
-      <Dialog open={this.state.open} onClose={(e)=>{this.setState({open:false})}}>
+      <Dialog open={this.state.open_new} onClose={(e)=>{this.setState({open_new:false})}}>
           <NewProperty onSuccess={()=>{this.setState({loaded:false});this.refresh()}} data="income" keys={Object.keys(this.state.incomes.data[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"})}></NewProperty>
+          </Dialog>
+          <Dialog open={this.state.open_edit} onClose={(e)=>{this.setState({open_edit:false})}}>
+          <EditProperty onSuccess={()=>{this.setState({loaded:false});this.refresh();this.setState({open_edit:false})}} object={this.state.edit_object} ></EditProperty>
           </Dialog>
       </TableContainer></AccordionDetails></Accordion>
       return html ;

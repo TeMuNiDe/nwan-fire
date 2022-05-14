@@ -7,6 +7,9 @@ import TableRow from '@material-ui/core/TableRow';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import NewProperty from './NewProperty';
+import EditProperty from './EditProperty';
+import EditSharpIcon from '@material-ui/icons/EditSharp';
+
 import { Dialog } from '@material-ui/core';
 
 import { withStyles } from '@material-ui/core/styles';
@@ -31,7 +34,7 @@ const styles = theme => ({
     
     constructor(props) {
         super(props);
-        this.state = {loaded:false,open:false,user:props.user,liabilities:null};
+        this.state = {loaded:false,open:false,open_edit:false,user:props.user,liabilities:null};
         this.refresh = this.refresh.bind(this)
       }
       
@@ -58,15 +61,19 @@ const styles = theme => ({
         <AccordionDetails> <TableContainer> <Table size="small" className={classes.table}>
           <TableHead className={classes.thead}>
             <TableRow>
-              {Object.keys(this.state.liabilities[0]).map((key)=>(
+              <TableCell></TableCell>
+              {Object.keys(this.state.liabilities[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"}).map((key)=>(
                   <TableCell key={key}>{key}</TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
         {this.state.liabilities.map( (liability,index)=> (
-          <TableRow key={index}>
-              {Object.keys(this.state.liabilities[0]).map((key)=>(<TableCell key={key}>{liability[key]}</TableCell>))}
+          <TableRow key={index} onMouseEnter={()=>{this.setState({hover:index})}}  onMouseLeave={()=>{this.setState({hover:null})}}>
+            <TableCell><span style={{visibility:this.state.hover==index?"visible":"hidden"}}>
+                <EditSharpIcon onClick={()=>{this.setState({open_edit:true,edit_object:liability})}} fontSize="small"></EditSharpIcon></span></TableCell>
+              {Object.keys(liability).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"}).map((key)=>(<TableCell key={key}>{liability[key]}</TableCell>))}
+              
           </TableRow>
         ))}
           <TableRow>
@@ -76,6 +83,9 @@ const styles = theme => ({
       </Table>
       <Dialog open={this.state.open} onClose={(e)=>{this.setState({open:false})}}>
           <NewProperty onSuccess={()=>{this.setState({loaded:false});this.refresh()}} data="liability" keys={Object.keys(this.state.liabilities[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"})}></NewProperty>
+          </Dialog>
+          <Dialog open={this.state.open_edit} onClose={(e)=>{this.setState({open_edit:false})}}>
+          <EditProperty onSuccess={()=>{this.setState({loaded:false});this.refresh();this.setState({open_edit:false})}} object={this.state.edit_object} ></EditProperty>
           </Dialog>
     </TableContainer> </AccordionDetails></Accordion>  
       return html ;

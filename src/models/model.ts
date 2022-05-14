@@ -74,7 +74,7 @@ class PropertyManager {
         let names = entries.map((entry: { name: string; })=>entry.name);
         months = [...new Set(months)];
         names = [...new Set(names)];
-        months.sort((a:any,b:any)=>a-b)
+        months.sort((a:any,b:any)=>b-a)
         let sorted: { user: number; data: string; month: any; name: any; gross: number; net: number; }[] = [];
         months.forEach(function (month: any) {
                 names.forEach((name: any) => {
@@ -85,7 +85,7 @@ class PropertyManager {
                     }
                 });
             });     
-        return {"index":{"months":months,"names":names},"data":sorted.sort((a,b)=>a.month-b.month)};
+        return {"index":{"months":months,"names":names},"data":sorted.sort((a,b)=>b.month-a.month)};
     }
 
     getProperty(id:string) {
@@ -187,7 +187,7 @@ class PropertyManager {
                             let y5_value = 0;
                             let y10_value = 0;
                             liabilities.forEach((liability:any)=>{
-                                current_value += liability.calculateLiabilityBalance(liability,"current");
+                                current_value += CalcUtils.calculateLiabilityBalance(liability,"current");
                                 y5_value += CalcUtils.calculateLiabilityBalance(liability,"y5");
                                 y10_value += CalcUtils.calculateLiabilityBalance(liability,"y10");
                             });
@@ -203,6 +203,10 @@ class PropertyManager {
                         }
                 
         }
+        user_doc.networth.current_value =   user_doc.investments.current_value+ user_doc.assets.current_value - user_doc.liabilities.current_value
+        user_doc.networth["5y_value"] =   user_doc.investments["5y_value"]+ user_doc.assets["5y_value"] - user_doc.liabilities["5y_value"]
+        user_doc.networth["10y_value"] =   user_doc.investments["10y_value"]+ user_doc.assets["10y_value"] - user_doc.liabilities["10y_value"]
+
         await this.db_manager.postDocument(user_doc);
         return user_doc;
     }
@@ -237,7 +241,7 @@ static  calculateLiabilityBalance(liability:any,term:string) {
         if(i%liability.installment_frequency==0) {
             balance-=liability.installment;
         }
-        if(balance<=0) {break};
+        if(balance<=0) {balance= 0;break};
     }
 
     return balance;
