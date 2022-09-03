@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import React,{Component} from 'react';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -18,6 +20,7 @@ import Accordion from '@material-ui/core/Accordion';
 import AccordionSummary from '@material-ui/core/AccordionSummary';
 import AccordionDetails from '@material-ui/core/AccordionDetails';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ProjectionView from './Projections';
 
 const styles = theme => ({
   table: {
@@ -32,8 +35,9 @@ class Incomes extends React.Component {
     
     constructor(props) {
         super(props);
-        this.state = {loaded:false,open_new:false,open_edit:false,user:props.user,incomes:null};
+        this.state = {loaded:false,open_new:false,open_edit:false,open_regress:false,user:props.user,incomes:null,regression:{inputs:null,results:null}};
         this.refresh = this.refresh.bind(this)
+        this.regress = this.regress.bind(this)
       }
       
 
@@ -42,7 +46,16 @@ class Incomes extends React.Component {
         fetch("http://localhost:3000/api/user/"+this.state.user.id+"/incomes")
         .then(res=>res.json())
         .then((result)=>{this.setState({incomes:result,loaded:true})}).catch(e=>{console.log(e)});
+        fetch("http://localhost:3000/api/user/"+this.state.user.id)
+        .then(res=>res.json())
+        .then((result)=>{this.setState({user:result,loaded:true})}).catch(e=>{console.log(e)});
       }
+      }
+      
+      regress() {
+        fetch("http://localhost:3000/api/user/"+this.state.user.id+"/regress/income")
+        .then(res=>res.json())
+        .then((result)=>{this.setState({regression:result,open_regress:true})}).catch(e=>{console.log(e)});
       }
   
        
@@ -51,8 +64,8 @@ class Incomes extends React.Component {
       const {classes} = this.props;
       if(this.state.incomes!=null){
       let html =   <Accordion TransitionProps={{ unmountOnExit: true }} onChange={this.refresh}><AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-      <Typography>Income</Typography><Typography>Last Month : {this.props.user.income.last_month} </Typography>
-      <Typography>Average : {this.props.user.income.average} </Typography>
+      <Typography>Income</Typography><Typography>Last Month : {this.state.user.income.last_month} </Typography>
+      <Typography>Average : {this.state.user.income.average} </Typography>
       </AccordionSummary>
       <AccordionDetails><TableContainer><Table size="small" className={classes.table}>
         <TableHead className={classes.thead}>
@@ -61,7 +74,7 @@ class Incomes extends React.Component {
           </TableRow>
           <TableRow>
             {this.state.incomes.index.months.map((month)=>(
-                <TableCell key={month}>{month}</TableCell>
+                <TableCell key={month}>{new Date(month*1000).toLocaleDateString()}</TableCell>
             ))}
           </TableRow>
         </TableHead>
@@ -76,21 +89,25 @@ class Incomes extends React.Component {
           </TableRow>
         ))}
              <TableRow>
-          <TableCell><Button  variant="outlined" onClick={(e)=>{this.setState({open_new:true})}}>Add</Button>
+          <TableCell><Button  variant="outlined" onClick={(e)=>{this.setState({open_new:true})}}>Add</Button></TableCell>
+          <TableCell><Button  variant="outlined" onClick={(e)=>{this.regress()}}>Project</Button>
 </TableCell>
         </TableRow>
         </TableBody>
       </Table>
       <Dialog open={this.state.open_new} onClose={(e)=>{this.setState({open_new:false})}}>
-          <NewProperty onSuccess={()=>{this.setState({loaded:false});this.refresh()}} data="income" keys={Object.keys(this.state.incomes.data[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"})}></NewProperty>
+          <NewProperty onSuccess={(response)=>{this.setState({loaded:false,user:response.user,incomes:response.properties})}} data="income" keys={Object.keys(this.state.incomes.data[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"})}></NewProperty>
           </Dialog>
           <Dialog open={this.state.open_edit} onClose={(e)=>{this.setState({open_edit:false})}}>
-          <EditProperty onSuccess={()=>{this.setState({loaded:false});this.refresh();this.setState({open_edit:false})}} object={this.state.edit_object} ></EditProperty>
+          <EditProperty onSuccess={(response)=>{this.setState({loaded:false,user:response.user,incomes:response.properties});this.setState({open_edit:false})}} object={this.state.edit_object} ></EditProperty>
+          </Dialog>
+          <Dialog open={this.state.open_regress} onClose={(e)=>{this.setState({open_regress:false})}}>
+         <ProjectionView data="income" results={this.state.regression.results} inputs={this.state.regression.inputs}/>
           </Dialog>
       </TableContainer></AccordionDetails></Accordion>
       return html ;
     }
-     else return <Accordion onChange={this.refresh} TransitionProps={{ unmountOnExit: true }} ><AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header"><Typography>Income</Typography><Typography>Last Month : {this.props.user.income.last_month} </Typography><Typography>Average : {this.props.user.income.average} </Typography></AccordionSummary><AccordionDetails><Typography>Loading</Typography> </AccordionDetails></Accordion>
+     else return <Accordion onChange={this.refresh} TransitionProps={{ unmountOnExit: true }} ><AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header"><Typography>Income</Typography><Typography>Last Month : {this.state.user.income.last_month} </Typography><Typography>Average : {this.state.user.income.average} </Typography></AccordionSummary><AccordionDetails><Typography>Loading</Typography> </AccordionDetails></Accordion>
  }
 
 }

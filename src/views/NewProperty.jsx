@@ -1,4 +1,5 @@
-import React,{Component} from 'react';
+/* eslint-disable */
+import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import PropTypes from 'prop-types';
@@ -48,9 +49,12 @@ const styles = theme => ({
             
         };
         fetch('http://localhost:3000/api/property', requestOptions)
-        .then(response => {
-            console.log(response.json())
-            this.props.onSuccess();
+        .then(response => response.json())
+        .then(data=>{
+            console.log("Response From Db");
+            console.log(data);
+            console.log(data.user);
+             this.props.onSuccess(data);
         })
         .catch(e=>console.log(e));
     
@@ -61,8 +65,8 @@ const styles = theme => ({
         return <form className={classes.form} noValidate autoComplete="off">
         {this.props.keys.map((key)=>(
                       <TextField  error={this.state.submitted&&!typeof this.state[key]=="undefined"} className={classes.form} onChange={(e)=>{
-                          this.setState({[key]:isNaN(e.target.value)?e.target.value:parseInt(e.target.value)})
-                        }} id={key} key={key} variant="outlined" label={key} required={true}/>
+                          this.setState({[key]:key==="month"?new Date(e.target.value).getTime()/1000:isNaN(e.target.value)?e.target.value:parseInt(e.target.value)})
+                        }} id={key} key={key} variant="outlined" label={key} type={key==="month"?"date":"text"}  required={true}/>
                 ))}
         <Button  variant="outlined" onClick={this.handleSave}>Save</Button>
         </form>

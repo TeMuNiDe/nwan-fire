@@ -1,4 +1,5 @@
-import React,{Component} from 'react';
+/* eslint-disable */
+import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import PropTypes from 'prop-types';
@@ -25,6 +26,7 @@ const styles = theme => ({
          });
      }
     handleSave() {
+
         this.setState({submitted:true});
         let unfilled = [];
         this.state.keys.forEach((key)=>{
@@ -32,6 +34,9 @@ const styles = theme => ({
                 unfilled.push(key);
             }
         });
+
+       
+
 
         if (unfilled.length>0) {
             console.log("Unfilled");
@@ -56,9 +61,12 @@ const styles = theme => ({
             
         };
         fetch('http://localhost:3000/api/property', requestOptions)
-        .then(response => {
-            console.log(response.json())
-            this.props.onSuccess();
+        .then(response => response.json())
+        .then(data=>{
+            console.log("Response From Db");
+            console.log(data);
+            console.log(data.user);
+             this.props.onSuccess(data);
         })
         .catch(e=>console.log(e));
     
@@ -68,9 +76,10 @@ const styles = theme => ({
         const {classes} = this.props;
         return <form className={classes.form} noValidate autoComplete="off">
         {this.state.keys.map((key)=>(
-                      <TextField defaultValue={this.props.object[key]}  error={this.state.submitted&&!typeof this.state[key]=="undefined"} className={classes.form} onChange={(e)=>{
-                          this.setState({[key]:isNaN(e.target.value)?e.target.value:parseInt(e.target.value)})
-                        }} id={key} key={key} variant="outlined" label={key} required={true}/>
+                      <TextField defaultValue={key==="month"?new Date(this.props.object[key]*1000).toISOString().split('T')[0]:this.props.object[key]}  error={this.state.submitted&&!typeof this.state[key]==="undefined"} className={classes.form} onChange={(e)=>{
+                          console.log(e.target.value);
+                          this.setState({[key]:key==="month"?new Date(e.target.value).getTime()/1000:isNaN(e.target.value)?e.target.value:parseInt(e.target.value)})
+                        }} id={key} key={key} variant="outlined" label={key} required={true} type={key==="month"?"date":"text"}/>
                 ))}
         <Button  variant="outlined" onClick={this.handleSave}>Save</Button>
         </form>
@@ -82,5 +91,5 @@ const styles = theme => ({
     classes: PropTypes.object.isRequired,
   };
   
-   
+
   export default withStyles(styles)(EditProperty);

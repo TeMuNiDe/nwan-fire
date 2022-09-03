@@ -1,5 +1,6 @@
+/* eslint-disable */
 
-import React,{Component} from 'react';
+import React from 'react';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -15,7 +16,6 @@ import { Dialog } from '@material-ui/core';
 
 import { withStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import TablePagination from '@material-ui/core/TablePagination';
 import TableContainer from '@material-ui/core/TableContainer';
 
 import Accordion from '@material-ui/core/Accordion';
@@ -57,8 +57,8 @@ class Expenditures extends React.Component {
       const {classes} = this.props;
       if(this.state.expenditures!=null){
       let html =  <Accordion  TransitionProps={{ unmountOnExit: true }} onChange={this.refresh}><AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-      <Typography>Expenditure</Typography><Typography>Last Month : {this.props.user.expenditure.last_month} </Typography>
-      <Typography>Average : {this.props.user.expenditure.average} </Typography>
+      <Typography>Expenditure</Typography><Typography>Last Month : {this.state.user.expenditure.last_month} </Typography>
+      <Typography>Average : {this.state.user.expenditure.average} </Typography>
       </AccordionSummary>
       <AccordionDetails> <TableContainer><Table size="small" className={classes.table}>
         <TableHead className={classes.thead}>
@@ -67,39 +67,39 @@ class Expenditures extends React.Component {
           </TableRow>
           <TableRow>
             {this.state.expenditures.index.months.map((month)=>(
-                <TableCell key={month}>{month}</TableCell>
+                <TableCell key={month}>{new Date(month*1000).toLocaleDateString()}</TableCell>
             ))}
           </TableRow>
         </TableHead>
         <TableBody>
-        {this.state.expenditures.index.names.map( (name,index_name)=> (
+        {this.state.expenditures.index.names.map((name,index_name)=> (
           <TableRow key={name}><TableCell>{name}</TableCell>
-            {this.state.expenditures.data.filter(item=>item.name==name).map((item,index) => (
+            {this.state.expenditures.data.filter(item=>item.name===name).map((item,index) => (
               <TableCell key={index} onMouseEnter={()=>{this.setState({hover:index_name+"_"+index})}}  onMouseLeave={()=>{this.setState({hover:null})}}  >{item.net}
-              <span style={{visibility:this.state.hover==index_name+"_"+index?"visible":"hidden"}}>
+              <span style={{visibility:this.state.hover===index_name+"_"+index?"visible":"hidden"}}>
                 <EditSharpIcon onClick={()=>{this.setState({open_edit:true,edit_object:item})}} fontSize="small"></EditSharpIcon></span></TableCell>
             ))}
           </TableRow>
         ))}
              <TableRow>
           <TableCell>          <Button  variant="outlined" onClick={(e)=>{this.setState({open:true})}}>Add</Button>
-</TableCell>
+        </TableCell>
         </TableRow>
         </TableBody>
       </Table>
       <Dialog open={this.state.open} onClose={(e)=>{this.setState({open:false})}}>
-          <NewProperty onSuccess={()=>{this.setState({loaded:false});this.refresh()}} data="expenditure" keys={Object.keys(this.state.expenditures.data[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"})}></NewProperty>
+          <NewProperty  onSuccess={(response)=>{this.setState({loaded:false,user:response.user,expenditures:response.properties})}} data="expenditure" keys={Object.keys(this.state.expenditures.data[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"})}></NewProperty>
           </Dialog>
           <Dialog open={this.state.open_edit} onClose={(e)=>{this.setState({open_edit:false})}}>
-          <EditProperty onSuccess={()=>{this.setState({loaded:false});this.refresh();this.setState({open_edit:false})}} object={this.state.edit_object} ></EditProperty>
+          <EditProperty onSuccess={(response)=>{this.setState({loaded:false,user:response.user,expenditures:response.properties});this.setState({open_edit:false})}} object={this.state.edit_object} ></EditProperty>
           </Dialog>
     </TableContainer></AccordionDetails></Accordion>
       return html ;
     } else {
     
      let html = <Accordion TransitionProps={{ unmountOnExit: true }} onChange={this.refresh}><AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-     <Typography>Expenditure</Typography><Typography>Last Month : {this.props.user.expenditure.last_month} </Typography>
-     <Typography>Average : {this.props.user.expenditure.average} </Typography>
+     <Typography>Expenditure</Typography><Typography>Last Month : {this.state.user.expenditure.last_month} </Typography>
+     <Typography>Average : {this.state.user.expenditure.average} </Typography>
      </AccordionSummary>
      <AccordionDetails><Typography>Loading</Typography></AccordionDetails></Accordion>      
      return html

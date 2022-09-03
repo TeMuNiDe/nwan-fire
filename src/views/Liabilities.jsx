@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import React,{Component} from 'react';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
@@ -54,9 +56,9 @@ const styles = theme => ({
         const {classes} = this.props;
         if(this.state.liabilities!=null){
         let html = <Accordion TransitionProps={{ unmountOnExit: true }} onChange={this.refresh}><AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-        <Typography>Liabilites</Typography><Typography>Current{this.props.user.liabilities.current_value} </Typography>
-        <Typography>5 year Projection{this.props.user.liabilities["5y_value"] }</Typography>
-        <Typography>10 year Projection{this.props.user.liabilities["10y_value"]} </Typography>
+        <Typography>Liabilites</Typography><Typography>Current{this.state.user.liabilities.current_value} </Typography>
+        <Typography>5 year Projection{this.state.user.liabilities["5y_value"] }</Typography>
+        <Typography>10 year Projection{this.state.user.liabilities["10y_value"]} </Typography>
         </AccordionSummary>
         <AccordionDetails> <TableContainer> <Table size="small" className={classes.table}>
           <TableHead className={classes.thead}>
@@ -82,19 +84,19 @@ const styles = theme => ({
         </TableBody>
       </Table>
       <Dialog open={this.state.open} onClose={(e)=>{this.setState({open:false})}}>
-          <NewProperty onSuccess={()=>{this.setState({loaded:false});this.refresh()}} data="liability" keys={Object.keys(this.state.liabilities[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"})}></NewProperty>
+          <NewProperty  onSuccess={(response)=>{this.setState({loaded:false,user:response.user,liabilities:response.properties})}} data="liability" keys={Object.keys(this.state.liabilities[0]).filter((key)=>{return key!=="_id"&&key!=="_rev"&&key!=="data"})}></NewProperty>
           </Dialog>
           <Dialog open={this.state.open_edit} onClose={(e)=>{this.setState({open_edit:false})}}>
-          <EditProperty onSuccess={()=>{this.setState({loaded:false});this.refresh();this.setState({open_edit:false})}} object={this.state.edit_object} ></EditProperty>
+          <EditProperty onSuccess={(response)=>{this.setState({loaded:false,user:response.user,liabilities:response.properties});this.setState({open_edit:false})}} object={this.state.edit_object} ></EditProperty>
           </Dialog>
     </TableContainer> </AccordionDetails></Accordion>  
       return html ;
     } else { 
     
     let html = <Accordion TransitionProps={{ unmountOnExit: true }} onChange={this.refresh}><AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1a-header">
-    <Typography>Liabilites</Typography><Typography>Current{this.props.user.liabilities.current_value} </Typography>
-    <Typography>5 year Projection{this.props.user.liabilities["5y_value"] }</Typography>
-    <Typography>10 year Projection{this.props.user.liabilities["10y_value"]} </Typography>
+    <Typography>Liabilites</Typography><Typography>Current{this.state.user.liabilities.current_value} </Typography>
+    <Typography>5 year Projection{this.state.user.liabilities["5y_value"] }</Typography>
+    <Typography>10 year Projection{this.state.user.liabilities["10y_value"]} </Typography>
     </AccordionSummary>
     <AccordionDetails ><Typography>Loading</Typography></AccordionDetails></Accordion>  
     return html;  

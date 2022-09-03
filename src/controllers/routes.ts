@@ -1,5 +1,5 @@
-import { CodeSharp } from "@material-ui/icons";
 import express from "express";
+import {Projections} from "../models/projections";
 import { UserManager,PropertyManager } from "../models/model";
 import { auth } from "./auth";
 
@@ -72,9 +72,23 @@ export default class RouteManager {
             data.then((property)=>{res.json(property)});
         });
         
-        this.api_router.route('/property').post((req: express.Request, res: express.Response) => {
+        this.api_router.route('/property').post((req: express.Request, res: express.Response,next: express.NextFunction) => {
+            if(auth(parseInt(req.body.user))) {next()} else {res.status(401).json({"property":req.params.id,"reason":"Authentication Failure"})}
+        }).post((req: express.Request, res: express.Response) => {
             let response = this.property_manager.setProperty(req.body);
             response.then(response=>res.json(response));
+        });
+        this.api_router.route('/user/:id/regress/:property').get((req: express.Request, res: express.Response,next: express.NextFunction) => {
+            if(auth(parseInt(req.params.id))) {next()} else {res.status(401).json({"property":req.params.id,"reason":"Authentication Failure"})}
+        }).get((req: express.Request, res: express.Response) => {
+            let data:any = [];
+            if(req.params.property=="income") {
+                data = this.user_manager.getIncomes(parseInt(req.params.id));
+            }
+            if(req.params.property=="expenditure") {
+                data = this.user_manager.getExpenditures(parseInt(req.params.id));
+            }
+            data.then((data:any)=>{res.json(Projections.projectAll(data))});
         });
         
         this.api_router.route('*').all((req: express.Request, res: express.Response, next: express.NextFunction)=>{res.status(400).json({"error":"Invalid Syntax"})});

@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 import Home from './views/Home';
 import React,{Component} from 'react';
 import ReactDOM from 'react-dom';

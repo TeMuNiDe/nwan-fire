@@ -1,5 +1,6 @@
 import db_manager from './db_manager';
 import { CloudantV1 } from '@ibm-cloud/cloudant';
+import { CompareSharp } from '@material-ui/icons';
 
    //TODO: create data models
 class UserManager {
@@ -94,8 +95,16 @@ class PropertyManager {
     async setProperty(doc:CloudantV1.Document){
         let response:any = await this.db_manager.postDocument(doc); 
         let updatedUser = await this.updateUserProperty(doc.user,doc.data);
-       
-        return response;
+        let updatedProperties = await this.db_manager.getUserProperty(doc.data,doc.user);
+        console.log(response);
+        console.log(updatedProperties);
+        if(doc.data=="income"||doc.data=="expenditure") {
+            let indexedProperties =  PropertyManager.indexEntries(updatedProperties);
+         //   console.log("ID PROP");
+           // console.log(indexedProperties);
+           return {response:response,user:updatedUser,properties:indexedProperties};
+        }
+        return {response:response,user:updatedUser,properties:updatedProperties};
     }
     async updateUserProperty(user:number,property:string) {
         let user_doc:any = await this.db_manager.getUser(user);
@@ -103,8 +112,8 @@ class PropertyManager {
            case "expenditure" : {
             let expenditures:any = await this.db_manager.getUserProperty(property,user);
             let months = expenditures.map((expenditure: { month: number; })=>expenditure.month);
-             console.log(months);
-             console.log(expenditures);
+           //  console.log(months);
+             //console.log(expenditures);
             let last_month = Math.max(...months);
             let last_month_expenditure = 0;
             let total_expenditure = 0;
@@ -115,16 +124,16 @@ class PropertyManager {
              let average_income = total_expenditure/months.length;
              user_doc.expenditure.average = average_income;
              user_doc.expenditure.last_month = last_month_expenditure;
-             console.log("Updated expenditure");
-             console.log(user_doc);
+           //  console.log("Updated expenditure");
+            // console.log(user_doc);
              break;
 
            }
            case "income" : {
                let incomes:any = await this.db_manager.getUserProperty(property,user);
                let months = incomes.map((income: { month: number; })=>income.month);
-                console.log(months);
-                console.log(incomes);
+               // console.log(months);
+              //  console.log(incomes);
                let last_month = Math.max(...months);
                let last_month_income = 0;
                let total_income = 0;
@@ -135,7 +144,7 @@ class PropertyManager {
                 let average_income = total_income/months.length;
                 user_doc.income.average = average_income;
                 user_doc.income.last_month = last_month_income;
-                console.log(user_doc);
+              //  console.log(user_doc);
                 break;
             }
             case "investment" :{
