@@ -1,6 +1,4 @@
 import db_manager from './db_manager';
-import { CloudantV1 } from '@ibm-cloud/cloudant';
-import { CompareSharp } from '@material-ui/icons';
 
    //TODO: create data models
 class UserManager {
@@ -92,7 +90,7 @@ class PropertyManager {
     getProperty(id:string) {
        return this.db_manager.getProperty(id);
     }
-    async setProperty(doc:CloudantV1.Document){
+    async setProperty(doc:any) {
         let response:any = await this.db_manager.postDocument(doc); 
         let updatedUser = await this.updateUserProperty(doc.user,doc.data);
         let updatedProperties = await this.db_manager.getUserProperty(doc.data,doc.user);
