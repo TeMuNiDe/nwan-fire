@@ -1,4 +1,3 @@
-
 import fetch from "node-fetch";
 class db_manager {
      dbName = process.env.DB_NAME;
@@ -6,7 +5,7 @@ class db_manager {
     constructor() {   
 
     }
-    async postFind(selector:any) {
+    async postFind(selector) {
 
       let result = await fetch(this.dbHost+"/"+this.dbName+"/_find", {
         method: "POST",
@@ -17,7 +16,7 @@ class db_manager {
       }).then((res) => { if (res.status=="200") {return res.json()} else {return null}}); 
       return result;
     } 
-    async getUser(id:number) {
+    async getUser(id) {
         let selector = {
             data: {
               '$eq': "user"
@@ -25,17 +24,16 @@ class db_manager {
                 '$eq': id
               }
           };         
-          console.log(selector);
           let result = await this.postFind(selector)
           if(result) {  
             return result.docs[0];
            } else {return null}
         }
 
-    async getUserProperty(type:string,user:number) {
+    async getUserProperty(type,user) {
         let selector = {
             "data": {
-              '$eq':type
+              '$eq': type
             },  "user": {
                 '$eq': user
               }
@@ -46,7 +44,7 @@ class db_manager {
           return result.docs;
          } else {return null}
     }
-    async getProperty(id:string) {
+    async getProperty(id) {
         let selector = {
             "_id": {
                 '$eq': id
@@ -59,7 +57,7 @@ class db_manager {
         return result.docs;
        } else {return null}
     }
-    async postDocument(doc:any) {
+    async postDocument(doc) {
 
       //check if document exists
 
@@ -71,8 +69,6 @@ class db_manager {
           },
         }).then((res) => res.status); 
         if (get_result=="200") {
-          console.log("Document already exists");
-          console.log(doc);
          let result =  await this.putDocument(doc._id,doc);
           return result;
         }
@@ -87,7 +83,7 @@ class db_manager {
       }).then((res) => { if (res.status=="200") {return res.json()} else {return null}}); 
       return result;
     }
-    async putDocument (id:string,doc:any) {
+    async putDocument (id,doc) {
       let result = await fetch(this.dbHost+"/"+this.dbName+"/"+id, {
         method: "PUT",
         headers: {

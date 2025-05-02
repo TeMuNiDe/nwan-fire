@@ -73,8 +73,8 @@ class Incomes extends React.Component {
            <TableCell rowSpan={2}>Name</TableCell><TableCell colSpan={5}>Amount</TableCell>
           </TableRow>
           <TableRow>
-            {this.state.incomes.index.months.map((month)=>(
-                <TableCell key={month}>{new Date(month*1000).toLocaleDateString()}</TableCell>
+            {this.state.incomes.index.dates.map((date)=>(
+                <TableCell key={date}>{new Date(date*1000).toLocaleDateString()}</TableCell>
             ))}
           </TableRow>
         </TableHead>

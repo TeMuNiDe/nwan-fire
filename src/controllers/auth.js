@@ -1,4 +1,4 @@
-export function auth(id:number) {
+export function auth(id) {
 //TODO Add User authentication.
 return true;
 };

@@ -65,8 +65,8 @@ const styles = theme => ({
         return <form className={classes.form} noValidate autoComplete="off">
         {this.props.keys.map((key)=>(
                       <TextField  error={this.state.submitted&&!typeof this.state[key]=="undefined"} className={classes.form} onChange={(e)=>{
-                          this.setState({[key]:key==="month"?new Date(e.target.value).getTime()/1000:isNaN(e.target.value)?e.target.value:parseInt(e.target.value)})
-                        }} id={key} key={key} variant="outlined" label={key} type={key==="month"?"date":"text"}  required={true}/>
+                          this.setState({[key]:key.match("date")?new Date(e.target.value).getTime()/1000:isNaN(e.target.value)?e.target.value:parseInt(e.target.value)})
+                        }} id={key} key={key} variant="outlined" label={key} type={key.match("date")?"date":"text"}  required={true}/>
                 ))}
         <Button  variant="outlined" onClick={this.handleSave}>Save</Button>
         </form>

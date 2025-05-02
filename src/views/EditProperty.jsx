@@ -76,10 +76,10 @@ const styles = theme => ({
         const {classes} = this.props;
         return <form className={classes.form} noValidate autoComplete="off">
         {this.state.keys.map((key)=>(
-                      <TextField defaultValue={key==="month"?new Date(this.props.object[key]*1000).toISOString().split('T')[0]:this.props.object[key]}  error={this.state.submitted&&!typeof this.state[key]==="undefined"} className={classes.form} onChange={(e)=>{
+                      <TextField defaultValue={key.match("date")?new Date(this.props.object[key]*1000).toISOString().split('T')[0]:this.props.object[key]}  error={this.state.submitted&&!typeof this.state[key]==="undefined"} className={classes.form} onChange={(e)=>{
                           console.log(e.target.value);
-                          this.setState({[key]:key==="month"?new Date(e.target.value).getTime()/1000:isNaN(e.target.value)?e.target.value:parseInt(e.target.value)})
-                        }} id={key} key={key} variant="outlined" label={key} required={true} type={key==="month"?"date":"text"}/>
+                          this.setState({[key]:key.match("date")?new Date(e.target.value).getTime()/1000:isNaN(e.target.value)?e.target.value:parseInt(e.target.value)})
+                        }} id={key} key={key} variant="outlined" label={key} required={true} type={key.match("date")?"date":"text"}/>
                 ))}
         <Button  variant="outlined" onClick={this.handleSave}>Save</Button>
         </form>
