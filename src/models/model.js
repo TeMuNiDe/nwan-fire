@@ -100,32 +100,32 @@ class PropertyManager {
            case "expenditure" : {
             let expenditures = await this.db_manager.getUserProperty(property,user);
             let dates = expenditures.map((expenditure)=>expenditure.date);
-            let last_date = Math.max(...dates);
-            let last_date_expenditure = 0;
+            let last_month = Math.max(...dates);
+            let last_month_expenditure = 0;
             let total_expenditure = 0;
             for(let i=0;i<dates.length;i++) {
                 total_expenditure += expenditures[i].net
-                if(expenditures[i].date == last_date) {last_date_expenditure += expenditures[i].net}
+                if(expenditures[i].date == last_month) {last_month_expenditure += expenditures[i].net}
              }
              let average_income = total_expenditure/dates.length;
              user_doc.expenditure.average = average_income;
-             user_doc.expenditure.last_date = last_date_expenditure;
+             user_doc.expenditure.last_month = last_month_expenditure;
              break;
 
            }
            case "income" : {
                let incomes = await this.db_manager.getUserProperty(property,user);
                let dates = incomes.map((income)=>income.date);
-               let last_date = Math.max(...dates);
-               let last_date_income = 0;
+               let last_month = Math.max(...dates);
+               let last_month_income = 0;
                let total_income = 0;
                for(let i=0;i<dates.length;i++) {
                    total_income += incomes[i].net
-                   if(incomes[i].date == last_date) {last_date_income += incomes[i].net}
+                   if(incomes[i].date == last_month) {last_month_income += incomes[i].net}
                 }
                 let average_income = total_income/dates.length;
                 user_doc.income.average = average_income;
-                user_doc.income.last_date = last_date_income;
+                user_doc.income.last_month = last_month_income;
                 break;
             }
             case "investment" :{

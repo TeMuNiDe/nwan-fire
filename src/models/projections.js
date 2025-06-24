@@ -5,13 +5,13 @@ class Projections {
 static projectAll(entries) {
     let indexedEntries = PropertyManager.indexEntries(entries);
     let entries_data = [];
-    indexedEntries.index.months.forEach((month) => {
-        let monthly_entries = entries.filter((entry) => entry.month == month);
+    indexedEntries.index.dates.forEach((date) => {
+        let monthly_entries = entries.filter((entry) => entry.date == date);
         let entry_net = 0;
         monthly_entries.forEach((entry) => {
             entry_net += entry.net;
         });
-        entries_data.push([new Date(month * 1000).getFullYear() * 12 + new Date(month * 1000).getMonth() - 2018 * 12, entry_net]);
+        entries_data.push([new Date(date * 1000).getFullYear() * 12 + new Date(date * 1000).getMonth() - 2018 * 12, entry_net]);
     });
     let month_5 = entries_data[0][0] + 5 * 12;
     let month_10 = entries_data[0][0] + 10 * 12;
