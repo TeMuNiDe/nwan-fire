@@ -9,6 +9,7 @@ import { createTheme, ThemeProvider } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core';
 
 
+
 const theme = createTheme({
     
     palette: {
@@ -35,7 +36,7 @@ class App extends React.Component{
     }
 
     componentDidMount(){
-        fetch("http://localhost:3000/api/user/0")
+        fetch(process.env.REACT_APP_SERVER_HOST,"/api/user/0")
         .then(res=>res.json())
         .then((result)=>{this.setState({user:result})})
         .catch(e=>{console.log(e)});

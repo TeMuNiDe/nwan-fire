@@ -3,6 +3,7 @@ import express, { Router } from 'express';
 import path from 'path';
 import cors from 'cors';
 import RouteManager from './controllers/routes.js';
+import RouteManagerV2 from './controllers/routes_v2.js';
 
 var app  = express();
 
@@ -32,8 +33,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true })) 
 app.use(express.static(path.join(path.resolve(),'/build')));
 //var apiRouter:Router = new RouteManager().getApiRouter();
-app.use('/api',cors(),new RouteManager().getApiRouter());
-//app.use('/api',cors(),apiRouter);
+//app.use('/api',cors(),new RouteManager().getApiRouter());
+app.use('/api/v2',cors(),new RouteManagerV2().getApiRouter());
 
 
 app.get('*', function(req, res){

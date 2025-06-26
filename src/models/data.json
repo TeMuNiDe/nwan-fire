@@ -1,0 +1,124 @@
+{
+    "users":[{
+        "id": 0,
+        "name": "John Doe",
+        "email": "john@example.com",
+        "auth_token": "abcdef123456",
+        "risk_score": 0.72,
+        "risk_tolerance": "standard",
+        "date_of_birth": 631152000,
+        "net_worth":[{
+            "date": 1627735402,
+            "value": 100000
+        }, {
+            "date": 1626735402,
+            "value": 95000
+        }, {
+            "date": 1666735402,
+            "value": 120000
+        }]
+    }],
+    "assets":[
+        {"user": 0,
+        "id": 1,
+        "name": "Savings Account SBI",
+        "type": "savings",
+        "value": [
+            {"date": 1627735402, "value": 500000},
+            {"date": 1626735402, "value": 480000},
+            {"date": 1666735402, "value": 520000}
+        ],
+        "user_weight":0,
+        "code": "SBI123456",
+        "aquired": 1627735402,
+        "auto_update":false,
+        "in_progress":false
+    },
+        {"user": 0,
+        "id": 1,
+        "name": "House",
+        "type": "Real Estate",
+        "value": [
+            {"date": 1627735402, "value": 500000},
+            {"date": 1626735402, "value": 480000},
+            {"date": 1666735402, "value": 520000}
+        ],
+        "user_weight":0,
+        "aquired": 1627735402,
+        "auto_update":false,
+        "in_progress":false
+    },{"user": 0,
+        "id": 1,
+        "name": "ICICI Balanced Advantage Fund",
+        "type": "MF",
+        "value": [
+            {"date": 1627735402, "value": 500000},
+            {"date": 1626735402, "value": 480000},
+            {"date": 1666735402, "value": 520000}
+        ],
+        "user_weight":1,
+        "code": "INF200K01Q0",
+        "aquired": 1627735402,
+        "auto_update":true,
+        "in_progress":true        
+    }],
+    "liabilities":[
+        {"user": 0,
+        "id": 1,
+        "name": "Mortgage",
+        "type": "Loan",
+        "value": [
+            {"date": 1627735402, "value": 300000},
+            {"date": 1626735402, "value": 310000},
+            {"date": 1666735402, "value": 290000}
+        ],
+        "aquired": 1627735402,
+        "auto_update":false
+    }],
+    "transactions":[
+        {
+            "user": 0,
+            "id": 1,
+            "date": 1627735402,
+            "amount": 1000,
+            "type": "credit",
+            "source": "income",
+            "source_id":1,
+            "category": "Salary",
+            "title": "Salary",
+            "description": "Monthly salary",
+            "target": "asset",
+            "target_id": 1
+            
+        }
+        ,{
+            "user": 0,
+            "id": 1,
+            "date": 1627735402,
+            "amount": 1000,
+            "type": "debit",
+            "source": "savings",
+            "source_id": 1,
+            "category": "Living",
+            "title": "Rent Payment",
+            "description": "Monthly rent for apartment",
+            "target": "expense",
+            "target_id": 1
+            
+        },
+        {
+            "user": 0,
+            "id": 1,
+            "date": 1627735402,
+            "amount": 1000,
+            "type": "debit",
+            "source": "savings",
+            "source_id":1,
+            "category": "emi",
+            "title": "EMI Payment",
+            "description": "Loan repayment",
+            "target": "liability",
+            "target_id": 1
+        }
+    ]
+}

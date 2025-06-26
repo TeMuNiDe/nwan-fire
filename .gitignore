@@ -9,3 +9,4 @@ src/vcap*
 .vs
 .ibm-project
 2.3.3
+*.fig
