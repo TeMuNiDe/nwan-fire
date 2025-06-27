@@ -1,20 +1,23 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 
 // Import sub-components for CashFlow
 import Trend from './cashflow/Trend';
 import Transactions from './cashflow/Transactions';
-import Distribution from './cashflow/Distribution';
-
 function CashFlow() {
   return (
     <Box>
       <Typography variant="h4" gutterBottom>
         Cash Flow
       </Typography>
+      <Grid container spacing={2} justifyContent="center">
+        <Grid item size={12}>
       <Trend />
+        </Grid>
+        <Grid item size={12} >
       <Transactions />
-      <Distribution />
+        </Grid>
+      </Grid>
     </Box>
   );
 }

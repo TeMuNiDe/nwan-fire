@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Grid, Typography } from '@mui/material';
 
 // Import sub-components for Dashboard
 import Networth from './dashboard/Networth';
@@ -12,9 +12,17 @@ function Dashboard() {
       <Typography variant="h4" gutterBottom>
         Dashboard
       </Typography>
+      <Grid container spacing={2} justifyContent="center">
+      <Grid item size={12} >
       <Networth />
+      </Grid>
+      <Grid item size={12} >
       <Details />
+      </Grid>
+      <Grid item size={12} >
       <Investments />
+      </Grid>
+      </Grid>
     </Box>
   );
 }
