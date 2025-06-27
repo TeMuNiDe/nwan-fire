@@ -3,12 +3,12 @@ import schemas from "./schema.js";
 
 class TransactionDb extends BaseDb {
     constructor() {
-        super("transaction", schemas.properties.transactions.items); // Assuming 'transactions' in schema.json is an array of transaction objects
+        super("transactions", schemas.properties.transactions.items); // Assuming 'transactions' in schema.json is an array of transaction objects
     }
 
     async getTransaction(id) {
         let selector = {
-            "id": {
+            "_id": {
                 "$eq": id
             }
         };

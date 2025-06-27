@@ -11,6 +11,14 @@ class BaseDb {
         this.validate = this.ajv.compile(schema);
     }
 
+    _stripRev(doc) {
+        if (doc && doc._rev !== undefined) {
+            const { _rev, ...rest } = doc;
+            return rest;
+        }
+        return doc;
+    }
+
     async postFind(selector) {
         let result = await fetch(`${this.dbHost}/${this.dbName}/_find`, {
             method: "POST",
@@ -19,6 +27,10 @@ class BaseDb {
             },
             body: JSON.stringify({ "selector": selector })
         }).then((res) => { if (res.status == 200) { return res.json() } else { return null } });
+
+        if (result && result.docs) {
+            result.docs = result.docs.map(doc => this._stripRev(doc));
+        }
         return result;
     }
 
@@ -28,18 +40,15 @@ class BaseDb {
             throw new Error("Document failed schema validation.");
         }
 
-        // Check if document exists
+        // Rename 'id' to '_id' if 'id' exists and '_id' does not
+        if (doc.id && !doc._id) {
+            doc._id = doc.id;
+            delete doc.id;
+        }
+
+        // If document already contains _id, it's a bad request for POST
         if (doc._id) {
-            let get_result = await fetch(`${this.dbHost}/${this.dbName}/${doc._id}`, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            }).then((res) => res.status);
-            if (get_result == 200) {
-                let result = await this.putDocument(doc._id, doc);
-                return result;
-            }
+            throw new Error("Document object should not contain _id for POST operations. Use PUT to update an existing document.");
         }
 
         let result = await fetch(`${this.dbHost}/${this.dbName}`, {
@@ -57,6 +66,25 @@ class BaseDb {
             console.error("Validation errors:", this.validate.errors);
             throw new Error("Document failed schema validation.");
         }
+
+        // Get the existing document to retrieve its _rev
+        let existingDocResponse = await fetch(`${this.dbHost}/${this.dbName}/${id}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (existingDocResponse.status === 404) {
+            throw new Error(`Document with _id ${id} not found.`);
+        }
+
+        if (existingDocResponse.status !== 200) {
+            throw new Error(`Failed to retrieve document with _id ${id}. Status: ${existingDocResponse.status}`);
+        }
+
+        const existingDocJson = await existingDocResponse.json();
+        doc._rev = existingDocJson._rev; // Add _rev for update
 
         let result = await fetch(`${this.dbHost}/${this.dbName}/${id}`, {
             method: "PUT",

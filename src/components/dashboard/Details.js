@@ -1,24 +1,67 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Typography, Paper, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import ArrowUpwardIcon from '@mui/icons-material/ArrowUpward';
 import ArrowDownwardIcon from '@mui/icons-material/ArrowDownward';
+import { useUser } from '../../contexts/UserContext';
 
 function Details() {
-  // Placeholder data
-  const assets = [
-    { name: 'Asset 1', type: 'Type A', value: '10000', term: '5 Years' },
-    { name: 'Asset 2', type: 'Type B', value: '25000', term: '10 Years' },
-    { name: 'Asset 3', type: 'Type C', value: '5000', term: '2 Years' },
-  ];
+  const { userId } = useUser();
+  const [assets, setAssets] = useState([]);
+  const [liabilities, setLiabilities] = useState([]);
+  const [totalAssets, setTotalAssets] = useState(0);
+  const [totalLiabilities, setTotalLiabilities] = useState(0);
+  const API_URL = process.env.REACT_APP_API_URL;
 
-  const liabilities = [
-    { name: 'Liability 1', type: 'Type X', value: '15000', term: '3 Years' },
-    { name: 'Liability 2', type: 'Type Y', value: '30000', term: '7 Years' },
-    { name: 'Liability 3', type: 'Type Z', value: '10000', term: '4 Years' },
-  ];
+  useEffect(() => {
+    const fetchAssets = async () => {
+      try {
+        const response = await fetch(`${API_URL}users/${userId}/assets`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data) {
+          const formattedAssets = data.map(asset => ({
+            name: asset.name,
+            type: asset.type,
+            value: asset.value && asset.value.length > 0 ? asset.value[asset.value.length - 1].value : 0,
+            term: 'N/A', // Term is not available in sample data, setting to N/A
+          }));
+          setAssets(formattedAssets);
+          setTotalAssets(formattedAssets.reduce((sum, asset) => sum + asset.value, 0));
+        }
+      } catch (error) {
+        console.error("Error fetching assets:", error);
+      }
+    };
 
-  const totalAssets = 100000; // Placeholder total
-  const totalLiabilities = 100000; // Placeholder total
+    const fetchLiabilities = async () => {
+      try {
+        const response = await fetch(`${API_URL}users/${userId}/liabilities`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        if (data) {
+          const formattedLiabilities = data.map(liability => ({
+            name: liability.name,
+            type: liability.type,
+            value: liability.value && liability.value.length > 0 ? liability.value[liability.value.length - 1].value : 0,
+            term: 'N/A', // Term is not available in sample data, setting to N/A
+          }));
+          setLiabilities(formattedLiabilities);
+          setTotalLiabilities(formattedLiabilities.reduce((sum, liability) => sum + liability.value, 0));
+        }
+      } catch (error) {
+        console.error("Error fetching liabilities:", error);
+      }
+    };
+
+    if (userId) {
+      fetchAssets();
+      fetchLiabilities();
+    }
+  }, [userId, API_URL]);
 
   const renderCardContent = (title, total, data, icon) => (
     <Paper elevation={3} sx={{ p: 2, height: '100%' }}>
@@ -26,7 +69,7 @@ function Details() {
         {icon}
         <Box ml={1}>
           <Typography variant="h6">{title}</Typography>
-          <Typography variant="body1">{total}</Typography>
+          <Typography variant="body1">{total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</Typography>
         </Box>
       </Box>
       <TableContainer>
@@ -44,7 +87,7 @@ function Details() {
               <TableRow key={index}>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{item.type}</TableCell>
-                <TableCell>{item.value}</TableCell>
+                <TableCell>{item.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</TableCell>
                 <TableCell>{item.term}</TableCell>
               </TableRow>
             ))}

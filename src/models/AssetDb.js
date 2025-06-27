@@ -3,12 +3,12 @@ import schemas from "./schema.js";
 
 class AssetDb extends BaseDb {
     constructor() {
-        super("asset", schemas.properties.assets.items); // Assuming 'assets' in schema.json is an array of asset objects
+        super("assets", schemas.properties.assets.items); // Assuming 'assets' in schema.json is an array of asset objects
     }
 
     async getAsset(id) {
         let selector = {
-            "id": {
+            "_id": {
                 "$eq": id
             }
         };

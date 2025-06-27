@@ -1,8 +1,14 @@
+const schema = require('./schema');
+const { validateObject } = require('../utils/validator');
+
 class Asset {
     constructor(asset) {
+        validateObject(asset, schema.properties.assets.items, 'Asset');
+
         this.user = asset.user;
-        this.id = asset.id;
+        this._id = asset._id;
         this.name = asset.name;
+        this.description = asset.description; // Added description
         this.type = asset.type;
         this.value = asset.value;
         this.userWeight = asset.user_weight;
@@ -19,12 +25,12 @@ class Asset {
         this.user = user;
     }
 
-    getId() {
-        return this.id;
+    get_Id() {
+        return this._id;
     }
 
-    setId(id) {
-        this.id = id;
+    set_Id(_id) {
+        this._id = _id;
     }
 
     getName() {
@@ -86,8 +92,9 @@ class Asset {
     toJson() {
         return {
             user: this.user,
-            id: this.id,
+            _id: this._id,
             name: this.name,
+            description: this.description,
             type: this.type,
             value: this.value,
             user_weight: this.userWeight,

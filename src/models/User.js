@@ -1,6 +1,11 @@
+import schema from './schema.js';
+import { validateObject } from '../utils/validator.js';
+
 class User {
     constructor(user) {
-        this.id = user.id;
+        validateObject(user, schema.properties.users.items, 'User');
+
+        this._id = user._id;
         this.name = user.name;
         this.email = user.email;
         this.authToken = user.auth_token;
@@ -10,12 +15,12 @@ class User {
         this.netWorth = user.net_worth;
     }
 
-    getId() {
-        return this.id;
+    get_Id() {
+        return this._id;
     }
 
-    setId(id) {
-        this.id = id;
+    set_Id(_id) {
+        this._id = _id;
     }
 
     getName() {
@@ -54,13 +59,6 @@ class User {
         return this.riskTolerance;
     }
 
-    setRiskTolerance(riskTolerance) {
-        const validTolerances = ["standard", "aggressive", "conservative"];
-        if (!validTolerances.includes(riskTolerance)) {
-            throw new Error(`Invalid risk tolerance: ${riskTolerance}. Must be one of ${validTolerances.join(", ")}.`);
-        }
-        this.riskTolerance = riskTolerance;
-    }
 
     getDateOfBirth() {
         return this.dateOfBirth;
@@ -80,7 +78,7 @@ class User {
 
     toJson() {
         return {
-            id: this.id,
+            _id: this._id,
             name: this.name,
             email: this.email,
             auth_token: this.authToken,

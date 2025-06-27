@@ -1,25 +1,43 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, Typography, Box, useTheme } from '@mui/material';
 import { LineChart, Line, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import ViewInArIcon from '@mui/icons-material/ViewInAr'; // Assuming a Cube icon is available in MUI
-
-const data = [
-  { name: 'Jan', 'Port 1': 4000, 'Port 2': 2400, 'Port 3': 2400 },
-  { name: 'Feb', 'Port 1': 3000, 'Port 2': 1398, 'Port 3': 2210 },
-  { name: 'Mar', 'Port 1': 2000, 'Port 2': 9800, 'Port 3': 2290 },
-  { name: 'Apr', 'Port 1': 2780, 'Port 2': 3908, 'Port 3': 2000 },
-  { name: 'May', 'Port 1': 1890, 'Port 2': 4800, 'Port 3': 2181 },
-  { name: 'Jun', 'Port 1': 2390, 'Port 2': 3800, 'Port 3': 2500 },
-  { name: 'Jul', 'Port 1': 3490, 'Port 2': 4300, 'Port 3': 2100 },
-  { name: 'Aug', 'Port 1': 4000, 'Port 2': 2400, 'Port 3': 2400 },
-  { name: 'Sep', 'Port 1': 3000, 'Port 2': 1398, 'Port 3': 2210 },
-  { name: 'Oct', 'Port 1': 2000, 'Port 2': 9800, 'Port 3': 2290 },
-  { name: 'Nov', 'Port 1': 2780, 'Port 2': 3908, 'Port 3': 2000 },
-  { name: 'Dec', 'Port 1': 1890, 'Port 2': 4800, 'Port 3': 2181 },
-];
+import ViewInArIcon from '@mui/icons-material/ViewInAr';
+import { useUser } from '../../contexts/UserContext';
 
 const Networth = () => {
   const theme = useTheme();
+  const { userId } = useUser();
+  const [networthData, setNetworthData] = useState([]);
+  const [currentNetworth, setCurrentNetworth] = useState(0);
+  const API_URL = process.env.REACT_APP_API_URL;
+
+  useEffect(() => {
+    const fetchNetworth = async () => {
+      try {
+        const response = await fetch(`${API_URL}users/${userId}/networth`);
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        
+        if (data && data.length > 0) {
+          const formattedData = data.map(item => ({
+            name: new Date(item.date * 1000).toLocaleString('default', { month: 'short' }),
+            'Net Worth': item.value,
+          }));
+          setNetworthData(formattedData);
+          // Get the latest net worth value
+          setCurrentNetworth(data[data.length - 1].value);
+        }
+      } catch (error) {
+        console.error("Error fetching net worth data:", error);
+      }
+    };
+
+    if (userId) {
+      fetchNetworth();
+    }
+  }, [userId, API_URL]);
 
   return (
     <Card sx={{ height: '100%', backgroundColor: theme.palette.background.paper, borderRadius: '8px' }} xs={12}> 
@@ -31,13 +49,13 @@ const Networth = () => {
               Networth
             </Typography>
             <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
-              1000000
+              {currentNetworth.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
             </Typography>
           </Box>
         </Box>
         <ResponsiveContainer width="100%" height={300}>
           <LineChart
-            data={data}
+            data={networthData}
             margin={{
               top: 5,
               right: 30,
@@ -49,9 +67,7 @@ const Networth = () => {
             <YAxis />
             <Tooltip />
             <Legend />
-            <Line type="monotone" dataKey="Port 1" stroke="#8884d8" activeDot={{ r: 8 }} />
-            <Line type="monotone" dataKey="Port 2" stroke="#82ca9d" />
-            <Line type="monotone" dataKey="Port 3" stroke="#ffc658" />
+            <Line type="monotone" dataKey="Net Worth" stroke="#8884d8" activeDot={{ r: 8 }} />
           </LineChart>
         </ResponsiveContainer>
       </CardContent>

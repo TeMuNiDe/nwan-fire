@@ -6,6 +6,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import theme from './theme'; // We will create this file next
 import AppLayout from './components/AppLayout'; // We will create this component next
+import { UserProvider } from './contexts/UserContext';
  
 class App extends React.Component{
     constructor(props) {
@@ -21,7 +22,9 @@ class App extends React.Component{
       return (
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <AppLayout />
+          <UserProvider>
+            <AppLayout />
+          </UserProvider>
         </ThemeProvider>
       );
   }

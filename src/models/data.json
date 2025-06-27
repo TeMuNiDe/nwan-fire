@@ -1,6 +1,6 @@
 {
     "users":[{
-        "id": "0",
+        "_id": "0",
         "name": "John Doe",
         "email": "john@example.com",
         "auth_token": "abcdef123456",
@@ -11,7 +11,7 @@
             "date": 1627735402,
             "value": 100000
         }, {
-            "date": 1626735402,
+            "date": 1639735402,
             "value": 95000
         }, {
             "date": 1666735402,
@@ -20,7 +20,7 @@
     }],
     "assets":[
         {"user": "0",
-        "id": "1",
+        "_id": "1",
         "name": "Savings Account SBI",
         "type": "savings",
         "value": [
@@ -34,10 +34,11 @@
         "units": 1,
         "aquired": 1627735402,
         "auto_update":false,
-        "in_progress":false
+        "in_progress":false,
+        "scope": "Liquid"
     },
         {"user": "0",
-        "id": "1",
+        "_id": "2",
         "name": "House",
         "type": "Real Estate",
         "value": [
@@ -51,9 +52,10 @@
         "units": 1,
         "aquired": 1627735402,
         "auto_update":false,
-        "in_progress":false
+        "in_progress":false,
+        "scope": "Long Term"
     },{"user": "0",
-        "id": "1",
+        "_id": "3",
         "name": "ICICI Balanced Advantage Fund",
         "type": "MF",
         "value": [
@@ -67,11 +69,12 @@
         "units": 100,
         "aquired": 1627735402,
         "auto_update":true,
-        "in_progress":true        
+        "in_progress":true,
+        "scope": "Short Term"
     }],
     "liabilities":[
         {"user": "0",
-        "id": "1",
+        "_id": "1",
         "name": "Mortgage",
         "description": "Home loan with SBI",
         "type": "Loan",
@@ -86,12 +89,12 @@
     "transactions":[
         {
             "user": "0",
-            "id": "1",
+            "_id": "1",
             "date": 1627735402,
             "amount": 1000,
             "type": "credit",
             "source": "income",
-            "source_id":1,
+            "source_id":"1",
             "category": "Salary",
             "name": "Salary",
             "description": "Monthly salary",
@@ -101,11 +104,11 @@
         }
         ,{
             "user": "0",
-            "id": "1",
+            "_id": "1",
             "date": 1627735402,
             "amount": 1000,
             "type": "debit",
-            "source": "savings",
+            "source": "asset",
             "source_id": "1",
             "category": "Living",
             "name": "Rent Payment",
@@ -116,11 +119,11 @@
         },
         {
             "user": "0",
-            "id": "1",
+            "_id": "1",
             "date": 1627735402,
             "amount": 1000,
             "type": "debit",
-            "source": "savings",
+            "source": "asset",
             "source_id":"1",
             "category": "emi",
             "name": "EMI Payment",

@@ -27,31 +27,31 @@ function get_sample_user() {
     return null;
 }
 
-function get_sample_asset() {
-    if (sample_data && sample_data.assets && sample_data.assets.length > 0) {
-        return new Asset(sample_data.assets[0]);
-    }
-    return null;
-}
-
-function get_sample_transaction() {
+function get_sample_transactions() {
     if (sample_data && sample_data.transactions && sample_data.transactions.length > 0) {
-        return new Transaction(sample_data.transactions[0]);
+        return sample_data.transactions.map(transaction=>new Transaction(transaction));
     }
     return null;
 }
 
-function get_sample_liability() {
+function get_sample_liabilities() {
     if (sample_data && sample_data.liabilities && sample_data.liabilities.length > 0) {
-        return new Liability(sample_data.liabilities[0]);
+        return sample_data.liabilities.map(liabilityData => new Liability(liabilityData));
     }
     return null;
+}
+
+function get_sample_assets() {
+    if (sample_data && sample_data.assets && sample_data.assets.length > 0) {
+        return sample_data.assets.map(assetData => new Asset(assetData));
+    }
+    return [];
 }
 
 export  {
     schema,
     get_sample_user,
-    get_sample_asset,
-    get_sample_transaction,
-    get_sample_liability
+    get_sample_assets,
+    get_sample_transactions,
+    get_sample_liabilities
 };

@@ -7,7 +7,7 @@ module.exports = {
             "items": {
                 "type": "object",
                 "properties": {
-                    "id": { "type": "string" },
+                    "_id": { "type": "string" },
                     "name": { "type": "string" },
                     "email": { "type": "string", "format": "email" },
                     "auth_token": { "type": "string" },
@@ -29,7 +29,7 @@ module.exports = {
                         }
                     }
                 },
-                "required": ["id", "name", "email", "auth_token", "risk_score", "risk_tolerance", "date_of_birth", "net_worth"]
+                "required": ["_id", "name", "email", "auth_token", "risk_score", "risk_tolerance", "date_of_birth", "net_worth"]
             }
         },
         "assets": {
@@ -38,7 +38,7 @@ module.exports = {
                 "type": "object",
                 "properties": {
                     "user": { "type": "string" },
-                    "id": { "type": "string" },
+                    "_id": { "type": "string" },
                     "name": { "type": "string" },
                     "type": { "type": "string" },
                     "description": { "type": "string" },
@@ -60,7 +60,7 @@ module.exports = {
                     "auto_update": { "type": "boolean" },
                     "in_progress": { "type": "boolean" }
                 },
-                "required": ["user", "id", "name","description", "type", "value","code", "user_weight", "aquired", "auto_update", "in_progress"]
+                "required": ["user", "_id", "name","description", "type", "value","code", "user_weight", "aquired", "auto_update", "in_progress"]
             }
         },
         "liabilities": {
@@ -69,7 +69,7 @@ module.exports = {
                 "type": "object",
                 "properties": {
                     "user": { "type": "string" },
-                    "id": { "type": "string" },
+                    "_id": { "type": "string" },
                     "name": { "type": "string" },
                     "description": { "type": "string" },
                     "type": { "type": "string" },
@@ -87,7 +87,7 @@ module.exports = {
                     "aquired": { "type": "integer" },
                     "auto_update": { "type": "boolean" }
                 },
-                "required": ["user", "id", "name","description", "type", "value", "aquired", "auto_update"]
+                "required": ["user", "_id", "name","description", "type", "value", "aquired", "auto_update"]
             }
         },
         "transactions": {
@@ -96,12 +96,9 @@ module.exports = {
                 "type": "object",
                 "properties": {
                     "user": { "type": "string" },
-                    "id": { "type": "string" },
+                    "_id": { "type": "string" },
                     "date": { "type": "integer" },
                     "amount": { "type": "number" },
-                    "type": { "type": "string" ,
-                        "enum": ["credit", "debit"]
-                    },
                     "source": {
                         "type": "string",
                         "enum": ["income", "expense","asset", "liability"]
@@ -117,7 +114,7 @@ module.exports = {
                     "target_id": { "type": "string" }
                 },
                 "required": [
-                    "user", "id", "date", "amount", "type", "source", "source_id",
+                    "user", "_id", "date", "amount", "source", "source_id",
                     "category", "name", "description", "target", "target_id"
                 ]
             }

@@ -18,26 +18,67 @@ import {
   Card,
   CardContent,
 } from '@mui/material';
+import { useUser } from '../contexts/UserContext';
 
 function Budget() {
-  const [investmentCapacity] = useState(60000);
-  const [aggressiveCapacity] = useState(40000);
-  const [conservativeCapacity] = useState(20000);
+  const { userId } = useUser();
+  const [investmentCapacity, setInvestmentCapacity] = useState(0);
+  const [longTermCapacity, setLongTermCapacity] = useState(0); // Renamed from aggressiveCapacity
+  const [shortTermCapacity, setShortTermCapacity] = useState(0); // Renamed from conservativeCapacity
 
   const [investedAmount, setInvestedAmount] = useState(0);
-  const [aggressiveInvested, setAggressiveInvested] = useState(0);
-  const [conservativeInvested, setConservativeInvested] = useState(0);
+  const [longTermInvested, setLongTermInvested] = useState(0); // Renamed from aggressiveInvested
+  const [shortTermInvested, setShortTermInvested] = useState(0); // Renamed from conservativeInvested
 
-  const initialPlanningRows = [
-    { id: 1, name: 'Investment 1', type: 'Aggressive', amount: 10000 },
-    { id: 2, name: 'Investment 2', type: 'Conservative', amount: 5000 },
-    { id: 3, name: 'Investment 3', type: 'Aggressive', amount: 15000 },
-    { id: 4, name: 'Investment 4', type: 'Conservative', amount: 7000 },
-    { id: 5, name: 'Investment 5', type: 'Aggressive', amount: 8000 },
-  ];
+  const [planningRows, setPlanningRows] = useState([]);
+  const [editingRows, setEditingRows] = useState([]);
+  const API_URL = process.env.REACT_APP_API_URL;
 
-  const [planningRows, setPlanningRows] = useState(initialPlanningRows);
-  const [editingRows, setEditingRows] = useState(initialPlanningRows);
+  useEffect(() => {
+    const fetchCapacityAndInProgressAssets = async () => {
+      if (!userId) return;
+
+      try {
+        // Fetch capacity data
+        const capacityResponse = await fetch(`${API_URL}users/${userId}/capacity`);
+        if (!capacityResponse.ok) {
+          throw new Error(`HTTP error! status: ${capacityResponse.status}`);
+        }
+        const capacityData = await capacityResponse.json();
+        setInvestmentCapacity(capacityData.investmentCapacity);
+        setLongTermCapacity(capacityData.aggressiveCapacity); // Map aggressive to long term
+        setShortTermCapacity(capacityData.conservativeCapacity); // Map conservative to short term
+
+        // Fetch in_progress assets
+        const assetsResponse = await fetch(`${API_URL}users/${userId}/assets/filter`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ in_progress: true }),
+        });
+        if (!assetsResponse.ok) {
+          throw new Error(`HTTP error! status: ${assetsResponse.status}`);
+        }
+        const inProgressAssets = await assetsResponse.json();
+
+        if (inProgressAssets) {
+          const initialRows = inProgressAssets.map((asset, index) => ({
+            id: asset.id || index, // Use asset ID or index as fallback
+            name: asset.name,
+            type: asset.scope, // Use 'scope' for type
+            amount: asset.value && asset.value.length > 0 ? asset.value.sort((a, b) => b.date - a.date)[0].value : 0,
+          }));
+          setPlanningRows(initialRows);
+          setEditingRows(initialRows);
+        }
+      } catch (error) {
+        console.error("Error fetching data for Budget component:", error);
+      }
+    };
+
+    fetchCapacityAndInProgressAssets();
+  }, [userId, API_URL]);
 
   useEffect(() => {
     calculateInvestedAmounts(planningRows);
@@ -45,24 +86,24 @@ function Budget() {
 
   const calculateInvestedAmounts = (rows) => {
     let totalInvested = 0;
-    let totalAggressive = 0;
-    let totalConservative = 0;
+    let totalLongTerm = 0;
+    let totalShortTerm = 0;
 
     rows.forEach((row) => {
       const amount = parseFloat(row.amount);
       if (!isNaN(amount)) {
         totalInvested += amount;
-        if (row.type === 'Aggressive') {
-          totalAggressive += amount;
-        } else if (row.type === 'Conservative') {
-          totalConservative += amount;
+        if (row.type === 'Long Term') {
+          totalLongTerm += amount;
+        } else if (row.type === 'Short Term' || row.type === 'Liquid') { // Consider Liquid as Short Term for this calculation
+          totalShortTerm += amount;
         }
       }
     });
 
     setInvestedAmount(totalInvested);
-    setAggressiveInvested(totalAggressive);
-    setConservativeInvested(totalConservative);
+    setLongTermInvested(totalLongTerm);
+    setShortTermInvested(totalShortTerm);
   };
 
   const handleEditRowChange = (id, field, value) => {
@@ -102,10 +143,10 @@ function Budget() {
   const getPercentageOfTerm = (row) => {
     const amount = parseFloat(row.amount);
     if (isNaN(amount) || amount === 0) return '0.00%';
-    if (row.type === 'Aggressive' && aggressiveInvested > 0) {
-      return ((amount / aggressiveInvested) * 100).toFixed(2) + '%';
-    } else if (row.type === 'Conservative' && conservativeInvested > 0) {
-      return ((amount / conservativeInvested) * 100).toFixed(2) + '%';
+    if (row.type === 'Long Term' && longTermInvested > 0) {
+      return ((amount / longTermInvested) * 100).toFixed(2) + '%';
+    } else if ((row.type === 'Short Term' || row.type === 'Liquid') && shortTermInvested > 0) {
+      return ((amount / shortTermInvested) * 100).toFixed(2) + '%';
     }
     return '0.00%';
   };
@@ -129,10 +170,10 @@ function Budget() {
                 {investmentCapacity.toLocaleString()}
               </Typography>
               <Typography variant="body1">
-                Aggressive : {aggressiveCapacity.toLocaleString()}
+                Long Term : {longTermCapacity.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
               </Typography>
               <Typography variant="body1">
-                Conservative : {conservativeCapacity.toLocaleString()}
+                Short Term : {shortTermCapacity.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
               </Typography>
             </CardContent>
           </Card>
@@ -144,13 +185,13 @@ function Budget() {
                 Invested amount
               </Typography>
               <Typography variant="h3" sx={{ color: 'primary.main', mb: 1 }}>
-                {investedAmount.toLocaleString()}
+                {investedAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
               </Typography>
               <Typography variant="body1">
-                Aggressive : {aggressiveInvested.toLocaleString()}
+                Long Term : {longTermInvested.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
               </Typography>
               <Typography variant="body1">
-                Conservative : {conservativeInvested.toLocaleString()}
+                Short Term : {shortTermInvested.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
               </Typography>
             </CardContent>
           </Card>
@@ -194,8 +235,9 @@ function Budget() {
                       <MenuItem value="">
                         <em>None</em>
                       </MenuItem>
-                      <MenuItem value="Aggressive">Aggressive</MenuItem>
-                      <MenuItem value="Conservative">Conservative</MenuItem>
+                      <MenuItem value="Long Term">Long Term</MenuItem>
+                      <MenuItem value="Short Term">Short Term</MenuItem>
+                      <MenuItem value="Liquid">Liquid</MenuItem>
                     </Select>
                   </FormControl>
                 </TableCell>
@@ -206,6 +248,7 @@ function Budget() {
                     value={row.amount}
                     onChange={(e) => handleEditRowChange(row.id, 'amount', e.target.value)}
                     size="small"
+                    inputProps={{ step: "0.01" }}
                   />
                 </TableCell>
                 <TableCell>

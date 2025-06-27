@@ -1,8 +1,14 @@
+const schema = require('./schema');
+const { validateObject } = require('../utils/validator');
+
 class Liability {
     constructor(liability) {
+        validateObject(liability, schema.properties.liabilities.items, 'Liability');
+
         this.user = liability.user;
-        this.id = liability.id;
+        this._id = liability._id;
         this.name = liability.name;
+        this.description = liability.description; // Added description
         this.type = liability.type;
         this.value = liability.value;
         this.acquired = liability.aquired;
@@ -17,12 +23,12 @@ class Liability {
         this.user = user;
     }
 
-    getId() {
-        return this.id;
+    get_Id() {
+        return this._id;
     }
 
-    setId(id) {
-        this.id = id;
+    set_Id(_id) {
+        this._id = _id;
     }
 
     getName() {
@@ -68,8 +74,9 @@ class Liability {
     toJson() {
         return {
             user: this.user,
-            id: this.id,
+            _id: this._id,
             name: this.name,
+            description: this.description,
             type: this.type,
             value: this.value,
             aquired: this.acquired,

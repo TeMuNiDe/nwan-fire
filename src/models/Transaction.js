@@ -1,10 +1,14 @@
+const schema = require('./schema');
+const { validateObject } = require('../utils/validator');
+
 class Transaction {
     constructor(transaction) {
+        validateObject(transaction, schema.properties.transactions.items, 'Transaction');
+
         this.user = transaction.user;
-        this.id = transaction.id;
+        this._id = transaction._id;
         this.date = transaction.date;
         this.amount = transaction.amount;
-        this.type = transaction.type;
         this.source = transaction.source;
         this.sourceId = transaction.source_id;
         this.category = transaction.category;
@@ -22,12 +26,12 @@ class Transaction {
         this.user = user;
     }
 
-    getId() {
-        return this.id;
+    get_Id() {
+        return this._id;
     }
 
-    setId(id) {
-        this.id = id;
+    set_Id(_id) {
+        this._id = _id;
     }
 
     getDate() {
@@ -46,28 +50,9 @@ class Transaction {
         this.amount = amount;
     }
 
-    getType() {
-        return this.type;
-    }
-
-    setType(type) {
-        const validTypes = ["credit", "debit"];
-        if (!validTypes.includes(type)) {
-            throw new Error(`Invalid transaction type: ${type}. Must be one of ${validTypes.join(", ")}.`);
-        }
-        this.type = type;
-    }
 
     getSource() {
         return this.source;
-    }
-
-    setSource(source) {
-        const validSources = ["income", "expense", "asset", "liability"];
-        if (!validSources.includes(source)) {
-            throw new Error(`Invalid transaction source: ${source}. Must be one of ${validSources.join(", ")}.`);
-        }
-        this.source = source;
     }
 
     getSourceId() {
@@ -102,18 +87,6 @@ class Transaction {
         this.description = description;
     }
 
-    getTarget() {
-        return this.target;
-    }
-
-    setTarget(target) {
-        const validTargets = ["income", "expense", "asset", "liability"];
-        if (!validTargets.includes(target)) {
-            throw new Error(`Invalid transaction source: ${target}. Must be one of ${validTargets.join(", ")}.`);
-        }
-        this.target = target;
-    }
-
     getTargetId() {
         return this.targetId;
     }
@@ -125,14 +98,13 @@ class Transaction {
     toJson() {
         return {
             user: this.user,
-            id: this.id,
+            _id: this._id,
             date: this.date,
             amount: this.amount,
-            type: this.type,
             source: this.source,
             source_id: this.sourceId,
             category: this.category,
-            title: this.title,
+            name: this.name, // Corrected from title to name
             description: this.description,
             target: this.target,
             target_id: this.targetId
