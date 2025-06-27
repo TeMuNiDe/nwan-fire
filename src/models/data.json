@@ -1,6 +1,6 @@
 {
     "users":[{
-        "id": 0,
+        "id": "0",
         "name": "John Doe",
         "email": "john@example.com",
         "auth_token": "abcdef123456",
@@ -19,8 +19,8 @@
         }]
     }],
     "assets":[
-        {"user": 0,
-        "id": 1,
+        {"user": "0",
+        "id": "1",
         "name": "Savings Account SBI",
         "type": "savings",
         "value": [
@@ -36,8 +36,8 @@
         "auto_update":false,
         "in_progress":false
     },
-        {"user": 0,
-        "id": 1,
+        {"user": "0",
+        "id": "1",
         "name": "House",
         "type": "Real Estate",
         "value": [
@@ -52,8 +52,8 @@
         "aquired": 1627735402,
         "auto_update":false,
         "in_progress":false
-    },{"user": 0,
-        "id": 1,
+    },{"user": "0",
+        "id": "1",
         "name": "ICICI Balanced Advantage Fund",
         "type": "MF",
         "value": [
@@ -70,8 +70,8 @@
         "in_progress":true        
     }],
     "liabilities":[
-        {"user": 0,
-        "id": 1,
+        {"user": "0",
+        "id": "1",
         "name": "Mortgage",
         "description": "Home loan with SBI",
         "type": "Loan",
@@ -85,48 +85,48 @@
     }],
     "transactions":[
         {
-            "user": 0,
-            "id": 1,
+            "user": "0",
+            "id": "1",
             "date": 1627735402,
             "amount": 1000,
             "type": "credit",
             "source": "income",
             "source_id":1,
             "category": "Salary",
-            "title": "Salary",
+            "name": "Salary",
             "description": "Monthly salary",
             "target": "asset",
-            "target_id": 1
+            "target_id": "1"
             
         }
         ,{
-            "user": 0,
-            "id": 1,
+            "user": "0",
+            "id": "1",
             "date": 1627735402,
             "amount": 1000,
             "type": "debit",
             "source": "savings",
-            "source_id": 1,
+            "source_id": "1",
             "category": "Living",
-            "title": "Rent Payment",
+            "name": "Rent Payment",
             "description": "Monthly rent for apartment",
             "target": "expense",
-            "target_id": 1
+            "target_id": "1"
             
         },
         {
-            "user": 0,
-            "id": 1,
+            "user": "0",
+            "id": "1",
             "date": 1627735402,
             "amount": 1000,
             "type": "debit",
             "source": "savings",
-            "source_id":1,
+            "source_id":"1",
             "category": "emi",
-            "title": "EMI Payment",
+            "name": "EMI Payment",
             "description": "Loan repayment",
             "target": "liability",
-            "target_id": 1
+            "target_id": "1"
         }
     ]
 }
