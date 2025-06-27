@@ -2,7 +2,6 @@
 import express, { Router } from 'express';
 import path from 'path';
 import cors from 'cors';
-import RouteManager from './controllers/routes.js';
 import RouteManagerV2 from './controllers/routes_v2.js';
 
 var app  = express();

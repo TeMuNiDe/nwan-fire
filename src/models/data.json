@@ -30,6 +30,8 @@
         ],
         "user_weight":0,
         "code": "SBI123456",
+        "description": "Primary savings account with SBI",
+        "units": 1,
         "aquired": 1627735402,
         "auto_update":false,
         "in_progress":false
@@ -44,6 +46,9 @@
             {"date": 1666735402, "value": 520000}
         ],
         "user_weight":0,
+        "code": "RE123456",
+        "description": "Primary residence",
+        "units": 1,
         "aquired": 1627735402,
         "auto_update":false,
         "in_progress":false
@@ -58,6 +63,8 @@
         ],
         "user_weight":1,
         "code": "INF200K01Q0",
+        "description": "Balanced Advantage Fund with ICICI",
+        "units": 100,
         "aquired": 1627735402,
         "auto_update":true,
         "in_progress":true        
@@ -66,6 +73,7 @@
         {"user": 0,
         "id": 1,
         "name": "Mortgage",
+        "description": "Home loan with SBI",
         "type": "Loan",
         "value": [
             {"date": 1627735402, "value": 300000},

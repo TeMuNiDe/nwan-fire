@@ -41,6 +41,9 @@ module.exports = {
                     "id": { "type": "string" },
                     "name": { "type": "string" },
                     "type": { "type": "string" },
+                    "description": { "type": "string" },
+                    "units": { "type": "number" },
+                    "code": { "type": "string" },
                     "value": {
                         "type": "array",
                         "items": {
@@ -57,7 +60,7 @@ module.exports = {
                     "auto_update": { "type": "boolean" },
                     "in_progress": { "type": "boolean" }
                 },
-                "required": ["user", "id", "name", "type", "value", "user_weight", "aquired", "auto_update", "in_progress"]
+                "required": ["user", "id", "name","description", "type", "value","code", "user_weight", "aquired", "auto_update", "in_progress"]
             }
         },
         "liabilities": {
@@ -68,6 +71,7 @@ module.exports = {
                     "user": { "type": "string" },
                     "id": { "type": "string" },
                     "name": { "type": "string" },
+                    'description': { "type": "string" },
                     "type": { "type": "string" },
                     "value": {
                         "type": "array",
@@ -83,7 +87,7 @@ module.exports = {
                     "aquired": { "type": "integer" },
                     "auto_update": { "type": "boolean" }
                 },
-                "required": ["user", "id", "name", "type", "value", "aquired", "auto_update"]
+                "required": ["user", "id", "name","description", "type", "value", "aquired", "auto_update"]
             }
         },
         "transactions": {
