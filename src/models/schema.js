@@ -71,7 +71,7 @@ module.exports = {
                     "user": { "type": "string" },
                     "id": { "type": "string" },
                     "name": { "type": "string" },
-                    'description': { "type": "string" },
+                    "description": { "type": "string" },
                     "type": { "type": "string" },
                     "value": {
                         "type": "array",
@@ -108,7 +108,7 @@ module.exports = {
                     },
                     "source_id": { "type": "string" },
                     "category": { "type": "string" },
-                    "title": { "type": "string" },
+                    "name": { "type": "string" },
                     "description": { "type": "string" },
                     "target": {
                         "type": "string" ,
@@ -118,7 +118,7 @@ module.exports = {
                 },
                 "required": [
                     "user", "id", "date", "amount", "type", "source", "source_id",
-                    "category", "title", "description", "target", "target_id"
+                    "category", "name", "description", "target", "target_id"
                 ]
             }
         }

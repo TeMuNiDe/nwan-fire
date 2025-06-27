@@ -8,7 +8,7 @@ class Transaction {
         this.source = transaction.source;
         this.sourceId = transaction.source_id;
         this.category = transaction.category;
-        this.title = transaction.title;
+        this.name = transaction.name;
         this.description = transaction.description;
         this.target = transaction.target;
         this.targetId = transaction.target_id;
@@ -86,12 +86,12 @@ class Transaction {
         this.category = category;
     }
 
-    getTitle() {
-        return this.title;
+    getName() {
+        return this.name;
     }
 
-    setTitle(title) {
-        this.title = title;
+    setName(name) {
+        this.name = name;
     }
 
     getDescription() {
