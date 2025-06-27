@@ -1,7 +1,11 @@
 /* eslint-disable */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
+import ReactDOM from 'react-dom/client'; // Updated import for React 18
+import { ThemeProvider } from '@mui/material/styles';
+import CssBaseline from '@mui/material/CssBaseline';
+import theme from './theme'; // We will create this file next
+import AppLayout from './components/AppLayout'; // We will create this component next
  
 class App extends React.Component{
     constructor(props) {
@@ -14,7 +18,13 @@ class App extends React.Component{
     }
 
     render(){
-      return <p>Hello, World!</p>;
+      return (
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <AppLayout />
+        </ThemeProvider>
+      );
   }
 }
-ReactDOM.render(<App/>,document.getElementById('root'));
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App/>);
