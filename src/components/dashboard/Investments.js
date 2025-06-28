@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Box, Typography, Paper, Grid } from '@mui/material';
 import { PieChart, Pie, Cell, Tooltip, Legend } from 'recharts';
 import { useUser } from '../../contexts/UserContext';
+import { ResponsiveContainer } from 'recharts';
 
 const COLORS1 = ['#82ca9d', '#ff8042', '#8884d8', '#FFBB28', '#FF8042']; // Green, Orange, Blue, Yellow, Red
 const COLORS2 = ['#ff8042', '#8884d8', '#82ca9d']; // Orange, Blue, Green
@@ -15,7 +16,7 @@ function Investments() {
   useEffect(() => {
     const fetchInvestments = async () => {
       try {
-        const response = await fetch(`${API_URL}users/${userId}/assets`);
+        const response = await fetch(`${API_URL}/users/${userId}/assets`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -67,21 +68,17 @@ function Investments() {
 
   return (
     <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        Investments
-      </Typography>
       <Grid container spacing={2} justifyContent="center">
         {/* Chart 1: By Type */}
-        <Grid item size={{ xs: 12, sm: 6, md: 6 }} >
+        <Grid item size={{ xs: 12, sm: 12, md: 12, lg:6 }} >
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Typography variant="subtitle1" gutterBottom>
-              By Type
+             Assets Type
             </Typography>
-            <PieChart  width={400} height={250}>
+             <ResponsiveContainer width="100%" height={250}>
+            <PieChart  >
               <Pie
                 data={investmentTypeData}
-                cx="50%"
-                cy="50%"
                 innerRadius={40}
                 outerRadius={80}
                 fill="#8884d8"
@@ -93,23 +90,24 @@ function Investments() {
                   <Cell key={`cell-${index}`} fill={COLORS1[index % COLORS1.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value) => value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} />
+              <Tooltip formatter={(value) => value.toLocaleString('en-US', { style: 'currency', currency: 'INR' })} />
               <Legend />
             </PieChart>
+            </ResponsiveContainer>
           </Box>
         </Grid>
 
         {/* Chart 2: By Scope */}
-        <Grid item size={{ xs: 12, sm: 6, md: 6 }}>
+        <Grid item size={{ xs: 12, sm: 12, md: 12,lg:6  }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Typography variant="subtitle1" gutterBottom>
-              By Scope
+              Assets Scope
             </Typography>
-             <PieChart width={400} height={250}>
+            <ResponsiveContainer width="100%" height={250}>
+             <PieChart >
               <Pie
                 data={investmentScopeData} // Renamed data source
-               cx="50%"
-                cy="50%"
+        
                 innerRadius={40}
                 outerRadius={80}
                 fill="#8884d8"
@@ -121,9 +119,10 @@ function Investments() {
                   <Cell key={`cell-${index}`} fill={COLORS2[index % COLORS2.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value) => value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })} />
+              <Tooltip formatter={(value) => value.toLocaleString('en-US', { style: 'currency', currency: 'INR' })} />
               <Legend />
             </PieChart>
+            </ResponsiveContainer>
           </Box>
         </Grid>
       </Grid>

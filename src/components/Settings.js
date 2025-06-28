@@ -44,7 +44,7 @@ function Settings() {
             label="Risk Score"
             type="number"
             defaultValue="0.75"
-            InputProps={{ inputProps: { step: 0.01 } }}
+            slotProps={{ input: { step: 0.01 } }}
           />
             </Grid>
             </Grid>

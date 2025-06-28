@@ -15,7 +15,7 @@ function Details() {
   useEffect(() => {
     const fetchAssets = async () => {
       try {
-        const response = await fetch(`${API_URL}users/${userId}/assets`);
+        const response = await fetch(`${API_URL}/users/${userId}/assets`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -37,7 +37,7 @@ function Details() {
 
     const fetchLiabilities = async () => {
       try {
-        const response = await fetch(`${API_URL}users/${userId}/liabilities`);
+        const response = await fetch(`${API_URL}/users/${userId}/liabilities`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -69,12 +69,12 @@ function Details() {
         {icon}
         <Box ml={1}>
           <Typography variant="h6">{title}</Typography>
-          <Typography variant="body1">{total.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</Typography>
+          <Typography variant="body1">{total.toLocaleString('en-US', { style: 'currency', currency: 'INR' })}</Typography>
         </Box>
       </Box>
       <TableContainer>
         <Table size="small">
-          <TableHead>
+          <TableHead sx={{ backgroundColor: '#f8f0fc' }}>
             <TableRow>
               <TableCell sx={{ fontWeight: 'bold', width: '25%' }}>Name</TableCell>
               <TableCell sx={{ fontWeight: 'bold', width: '25%' }}>Type</TableCell>
@@ -87,7 +87,7 @@ function Details() {
               <TableRow key={index}>
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{item.type}</TableCell>
-                <TableCell>{item.value.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}</TableCell>
+                <TableCell>{item.value.toLocaleString('en-US', { style: 'currency', currency: 'INR' })}</TableCell>
                 <TableCell>{item.term}</TableCell>
               </TableRow>
             ))}

@@ -17,7 +17,7 @@ app.get('*', function(req, res){
   res.status(404).send('what???');
 });
 
-var port = process.env.PORT || 3000
+var port = process.env.PORT_SERVER || 3000
 app.listen(port, function() {
     console.log("Server listening at "+ process.env.REACT_APP_SERVER_HOST);
 });

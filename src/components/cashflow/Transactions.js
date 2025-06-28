@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import {
   Box,
   Typography,
@@ -13,59 +13,57 @@ import {
   TableBody,
   TableRow,
   TableCell,
-  TextField, // Added TextField import
+  TextField,
   Divider,
-  Grid, // Added Divider import
+  Grid,
 } from '@mui/material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
 
-import Distribution from './Distribution'; // Import Distribution component
-
-// Placeholder data
-const placeholderTransactions = [
-  { id: 1, name: 'Grocery', category: 'Food', amount: 150, source: 'liability', source_id: 'liability1', target: 'asset', target_id: 'asset1', date: '2025-06-27' },
-  { id: 2, name: 'Salary', category: 'Income', amount: 3000, source: 'income', source_id: '', target: 'asset', target_id: 'asset1', date: '2025-06-26' },
-  { id: 3, name: 'Rent', category: 'Housing', amount: 1200, source: 'asset', source_id: 'asset1', target: 'expense', target_id: '', date: '2025-06-25' },
-  { id: 4, name: 'Coffee', category: 'Food', amount: 5, source: 'asset', source_id: 'asset1', target: 'expense', target_id: '', date: '2025-06-27' },
-  { id: 5, name: 'Books', category: 'Education', amount: 50, source: 'asset', source_id: 'asset2', target: 'expense', target_id: '', date: '2025-06-24' },
-  { id: 6, name: 'Dinner', category: 'Food', amount: 80, source: 'asset', source_id: 'asset1', target: 'expense', target_id: '', date: '2025-06-23' },
-  { id: 7, name: 'Utilities', category: 'Bills', amount: 100, source: 'asset', source_id: 'asset1', target: 'expense', target_id: '', date: '2025-06-22' },
-  { id: 8, name: 'Gym Membership', category: 'Health', amount: 40, source: 'asset', source_id: 'asset2', target: 'expense', target_id: '', date: '2025-06-21' },
-  { id: 9, name: 'Transportation', category: 'Travel', amount: 20, source: 'asset', source_id: 'asset1', target: 'expense', target_id: '', date: '2025-06-20' },
-  { id: 10, name: 'Movie Tickets', category: 'Entertainment', amount: 25, source: 'asset', source_id: 'asset1', target: 'expense', target_id: '', date: '2025-06-19' },
-];
-
-// Placeholder assets and liabilities
-const placeholderAssets = [
-  { id: 'asset1', name: 'Savings Account' },
-  { id: 'asset2', name: 'Investment Portfolio' },
-];
-
-const placeholderLiabilities = [
-  { id: 'liability1', name: 'Credit Card Debt' },
-  { id: 'liability2', name: 'Student Loan' },
-];
+import Distribution from './Distribution';
+import { useUser } from '../../contexts/UserContext';
 
 function Transactions() {
+  const { userId } = useUser();
+
   const [dateRange, setDateRange] = useState('Today');
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [openDatePicker, setOpenDatePicker] = useState(false);
-  const [filteredTransactions, setFilteredTransactions] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [displayNamesCache, setDisplayNamesCache] = useState(new Map());
+  const API_URL = process.env.REACT_APP_API_URL
 
-  // Helper function to get display name for source/target
-  const getDisplayName = (type, id) => {
+  const pathMap = {asset: 'assets',liability: 'liabilities'}
+
+  const fetchProperty = async (type, id, property) => {
+    const cacheKey = `${type}-${id}-${property}`;
+    if (displayNamesCache.has(cacheKey)) {
+      return displayNamesCache.get(cacheKey);
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/users/${userId}/${pathMap[type]}/${id}/${property}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch ${property} for ${type} with ID ${id}`);
+      }
+      const data = await response.json();
+      const value = data[property];
+      setDisplayNamesCache(prev => new Map(prev).set(cacheKey, value));
+      return value;
+    } catch (error) {
+      console.error(`Error fetching ${type} ${property}:`, error);
+      return `Unknown ${type}`;
+    }
+  };
+
+  const getDisplayName = async (type, id) => {
     if (type === 'income' || type === 'expense') {
-      return type.charAt(0).toUpperCase() + type.slice(1); // Capitalize "Income" or "Expense"
-    } else if (type === 'asset') {
-      const asset = placeholderAssets.find(a => a.id === id);
-      return asset ? asset.name : 'Unknown Asset';
-    } else if (type === 'liability') {
-      const liability = placeholderLiabilities.find(l => l.id === id);
-      return liability ? liability.name : 'Unknown Liability';
+      return type.charAt(0).toUpperCase() + type.slice(1);
+    } else if (type === 'asset' || type === 'liability') {
+      return await fetchProperty(type, id, 'name');
     }
     return 'N/A';
   };
@@ -81,7 +79,7 @@ function Transactions() {
         calculatedEndDate = endOfDay(today);
         break;
       case 'This week':
-        calculatedStartDate = startOfWeek(today, { weekStartsOn: 1 }); // Monday as start of week
+        calculatedStartDate = startOfWeek(today, { weekStartsOn: 1 });
         calculatedEndDate = endOfWeek(today, { weekStartsOn: 1 });
         break;
       case 'This Month':
@@ -89,7 +87,6 @@ function Transactions() {
         calculatedEndDate = endOfMonth(today);
         break;
       case 'Custom Range':
-        // Handled by DatePicker
         break;
       default:
         break;
@@ -102,16 +99,63 @@ function Transactions() {
   }, [dateRange]);
 
   useEffect(() => {
-    if (startDate && endDate) {
-      const filtered = placeholderTransactions.filter(transaction => {
-        const transactionDate = new Date(transaction.date);
-        return transactionDate >= startDate && transactionDate <= endDate;
-      });
-      setFilteredTransactions(filtered);
-    } else {
-      setFilteredTransactions(placeholderTransactions); // Show all if no range selected
+    const fetchTransactions = async () => {
+      if (startDate && endDate && userId) {
+        try {
+          const response = await fetch(`${API_URL}/users/${userId}/transactions/query-by-date`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              start_date: startDate.getTime(),
+              end_date: endDate.getTime(),
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error('Failed to fetch transactions');
+          }
+          const data = await response.json();
+          setTransactions(data);
+        } catch (error) {
+          console.error('Error fetching transactions:', error);
+          setTransactions([]);
+        }
+      } else {
+        setTransactions([]);
+      }
+    };
+
+    fetchTransactions();
+  }, [startDate, endDate, userId]);
+
+  useEffect(() => {
+    const resolveDisplayNames = async () => {
+      const newDisplayNamesCache = new Map(displayNamesCache);
+      for (const transaction of transactions) {
+        if ((transaction.source === 'asset' || transaction.source === 'liability') && transaction.source_id) {
+          const cacheKey = `${transaction.source}-${transaction.source_id}-name`;
+          if (!newDisplayNamesCache.has(cacheKey)) {
+            const name = await fetchProperty(transaction.source, transaction.source_id, 'name');
+            newDisplayNamesCache.set(cacheKey, name);
+          }
+        }
+        if ((transaction.target === 'asset' || transaction.target === 'liability') && transaction.target_id) {
+          const cacheKey = `${transaction.target}-${transaction.target_id}-name`;
+          if (!newDisplayNamesCache.has(cacheKey)) {
+            const name = await fetchProperty(transaction.target, transaction.target_id, 'name');
+            newDisplayNamesCache.set(cacheKey, name);
+          }
+          }
+      }
+      setDisplayNamesCache(newDisplayNamesCache);
+    };
+
+    if (transactions.length > 0) {
+      resolveDisplayNames();
     }
-  }, [startDate, endDate, dateRange]);
+  }, [transactions, userId]);
 
   const handleDateRangeChange = (event) => {
     const value = event.target.value;
@@ -133,7 +177,7 @@ function Transactions() {
     setEndDate(date);
   };
 
-  const totalAmount = filteredTransactions.reduce((sum, transaction) => sum + transaction.amount, 0);
+  const totalAmount = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
 
   return (
     <Grid container spacing={2} justifyContent="center">
@@ -202,13 +246,21 @@ function Transactions() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {filteredTransactions.map((transaction) => (
-              <TableRow key={transaction.id}>
+            {transactions.map((transaction) => (
+              <TableRow key={transaction._id}>
                 <TableCell>{transaction.name}</TableCell>
                 <TableCell>{transaction.category}</TableCell>
                 <TableCell>${transaction.amount}</TableCell>
-                <TableCell>{getDisplayName(transaction.source, transaction.source_id)}</TableCell>
-                <TableCell>{getDisplayName(transaction.target, transaction.target_id)}</TableCell>
+                <TableCell>
+                  {transaction.source === 'income' || transaction.source === 'expense'
+                    ? transaction.source.charAt(0).toUpperCase() + transaction.source.slice(1)
+                    : displayNamesCache.get(`${transaction.source}-${transaction.source_id}-name`) || 'Loading...'}
+                </TableCell>
+                <TableCell>
+                  {transaction.target === 'income' || transaction.target === 'expense'
+                    ? transaction.target.charAt(0).toUpperCase() + transaction.target.slice(1)
+                    : displayNamesCache.get(`${transaction.target}-${transaction.target_id}-name`) || 'Loading...'}
+                </TableCell>
                 <TableCell>{format(new Date(transaction.date), 'yyyy-MM-dd')}</TableCell>
               </TableRow>
             ))}
@@ -218,13 +270,11 @@ function Transactions() {
     </Paper>
       </Grid>
       <Grid item size={12}>
-      <Divider sx={{ my: 2 }} /> {/* Add Divider here */}
+      <Divider sx={{ my: 2 }} />
       </Grid>
       <Grid item size={12}>
       <Distribution
-        transactions={filteredTransactions}
-        assets={placeholderAssets}
-        liabilities={placeholderLiabilities}
+        transactions={transactions}
         startDate={startDate}
         endDate={endDate}
         getDisplayName={getDisplayName}

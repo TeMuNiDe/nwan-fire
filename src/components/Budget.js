@@ -167,13 +167,13 @@ function Budget() {
                 Investment Capacity
               </Typography>
               <Typography variant="h3" sx={{ color: 'success.main', mb: 1 }}>
-                {investmentCapacity.toLocaleString()}
+                {investmentCapacity.toLocaleString('en-US', { style: 'currency', currency: 'INR' })}
               </Typography>
               <Typography variant="body1">
-                Long Term : {longTermCapacity.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                Long Term : {longTermCapacity.toLocaleString('en-US', { style: 'currency', currency: 'INR' })}
               </Typography>
               <Typography variant="body1">
-                Short Term : {shortTermCapacity.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                Short Term : {shortTermCapacity.toLocaleString('en-US', { style: 'currency', currency: 'INR' })}
               </Typography>
             </CardContent>
           </Card>
@@ -185,13 +185,13 @@ function Budget() {
                 Invested amount
               </Typography>
               <Typography variant="h3" sx={{ color: 'primary.main', mb: 1 }}>
-                {investedAmount.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                {investedAmount.toLocaleString('en-US', { style: 'currency', currency: 'INR' })}
               </Typography>
               <Typography variant="body1">
-                Long Term : {longTermInvested.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                Long Term : {longTermInvested.toLocaleString('en-US', { style: 'currency', currency: 'INR' })}
               </Typography>
               <Typography variant="body1">
-                Short Term : {shortTermInvested.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+                Short Term : {shortTermInvested.toLocaleString('en-US', { style: 'currency', currency: 'INR' })}
               </Typography>
             </CardContent>
           </Card>
@@ -248,7 +248,7 @@ function Budget() {
                     value={row.amount}
                     onChange={(e) => handleEditRowChange(row.id, 'amount', e.target.value)}
                     size="small"
-                    inputProps={{ step: "0.01" }}
+                    slotProps={{input:{ step: "0.01" }}}
                   />
                 </TableCell>
                 <TableCell>

@@ -14,22 +14,11 @@ module.exports = {
                     "risk_score": { "type": "number" },
                     "risk_tolerance": {
                         "type": "string",
-                        "enum": ["standard", "aggressive", "conservative"]
+                        "enum": ["Standard", "Aggressive", "Conservative"]
                     },
-                    "date_of_birth": { "type": "integer" },
-                    "net_worth": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "date": { "type": "integer" },
-                                "value": { "type": "number" }
-                            },
-                            "required": ["date", "value"]
-                        }
-                    }
+                    "date_of_birth": { "type": "integer" }
                 },
-                "required": ["_id", "name", "email", "auth_token", "risk_score", "risk_tolerance", "date_of_birth", "net_worth"]
+                "required": ["_id", "name", "email", "auth_token", "risk_score", "risk_tolerance", "date_of_birth"]
             }
         },
         "assets": {
@@ -55,12 +44,13 @@ module.exports = {
                             "required": ["date", "value"]
                         }
                     },
+                    "scope": {"type": "string",enum: ["Short Term", "Long Term","Liquid"]},
                     "user_weight": { "type": "number" },
                     "aquired": { "type": "integer" },
                     "auto_update": { "type": "boolean" },
                     "in_progress": { "type": "boolean" }
                 },
-                "required": ["user", "_id", "name","description", "type", "value","code", "user_weight", "aquired", "auto_update", "in_progress"]
+                "required": ["user", "_id", "name","description", "type", "value","code", "user_weight","scope", "aquired", "auto_update", "in_progress"]
             }
         },
         "liabilities": {

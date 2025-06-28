@@ -5,18 +5,8 @@
         "email": "john@example.com",
         "auth_token": "abcdef123456",
         "risk_score": 0.72,
-        "risk_tolerance": "standard",
-        "date_of_birth": 631152000,
-        "net_worth":[{
-            "date": 1627735402,
-            "value": 100000
-        }, {
-            "date": 1639735402,
-            "value": 95000
-        }, {
-            "date": 1666735402,
-            "value": 120000
-        }]
+        "risk_tolerance": "Standard",
+        "date_of_birth": 631152000000
     }],
     "assets":[
         {"user": "0",
@@ -24,15 +14,15 @@
         "name": "Savings Account SBI",
         "type": "savings",
         "value": [
-            {"date": 1627735402, "value": 500000},
-            {"date": 1626735402, "value": 480000},
-            {"date": 1666735402, "value": 520000}
+            {"date": 1627735402000, "value": 500000},
+            {"date": 1626735402000, "value": 480000},
+            {"date": 1666735402000, "value": 520000}
         ],
         "user_weight":0,
         "code": "SBI123456",
         "description": "Primary savings account with SBI",
         "units": 1,
-        "aquired": 1627735402,
+        "aquired": 1627735402000,
         "auto_update":false,
         "in_progress":false,
         "scope": "Liquid"
@@ -42,15 +32,15 @@
         "name": "House",
         "type": "Real Estate",
         "value": [
-            {"date": 1627735402, "value": 500000},
-            {"date": 1626735402, "value": 480000},
-            {"date": 1666735402, "value": 520000}
+            {"date": 1627735402000, "value": 500000},
+            {"date": 1626735402000, "value": 480000},
+            {"date": 1666735402000, "value": 520000}
         ],
         "user_weight":0,
         "code": "RE123456",
         "description": "Primary residence",
         "units": 1,
-        "aquired": 1627735402,
+        "aquired": 1627735402000,
         "auto_update":false,
         "in_progress":false,
         "scope": "Long Term"
@@ -59,15 +49,15 @@
         "name": "ICICI Balanced Advantage Fund",
         "type": "MF",
         "value": [
-            {"date": 1627735402, "value": 500000},
-            {"date": 1626735402, "value": 480000},
-            {"date": 1666735402, "value": 520000}
+            {"date": 1627735402000, "value": 500000},
+            {"date": 1626735402000, "value": 480000},
+            {"date": 1666735402000, "value": 520000}
         ],
         "user_weight":1,
         "code": "INF200K01Q0",
         "description": "Balanced Advantage Fund with ICICI",
         "units": 100,
-        "aquired": 1627735402,
+        "aquired": 1627735402000,
         "auto_update":true,
         "in_progress":true,
         "scope": "Short Term"
@@ -79,20 +69,19 @@
         "description": "Home loan with SBI",
         "type": "Loan",
         "value": [
-            {"date": 1627735402, "value": 300000},
-            {"date": 1626735402, "value": 310000},
-            {"date": 1666735402, "value": 290000}
+            {"date": 1627735402000, "value": 300000},
+            {"date": 1626735402000, "value": 310000},
+            {"date": 1666735402000, "value": 290000}
         ],
-        "aquired": 1627735402,
+        "aquired": 1627735402000,
         "auto_update":false
     }],
     "transactions":[
         {
             "user": "0",
             "_id": "1",
-            "date": 1627735402,
-            "amount": 1000,
-            "type": "credit",
+            "date": 1627735402000,
+            "amount": 100000,
             "source": "income",
             "source_id":"1",
             "category": "Salary",
@@ -104,10 +93,9 @@
         }
         ,{
             "user": "0",
-            "_id": "1",
-            "date": 1627735402,
+            "_id": "2",
+            "date": 1627735402000,
             "amount": 1000,
-            "type": "debit",
             "source": "asset",
             "source_id": "1",
             "category": "Living",
@@ -119,10 +107,9 @@
         },
         {
             "user": "0",
-            "_id": "1",
-            "date": 1627735402,
+            "_id": "3",
+            "date": 1627735402000,
             "amount": 1000,
-            "type": "debit",
             "source": "asset",
             "source_id":"1",
             "category": "emi",

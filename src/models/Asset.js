@@ -13,6 +13,7 @@ class Asset {
         this.value = asset.value;
         this.userWeight = asset.user_weight;
         this.acquired = asset.aquired;
+        this.scope = asset.scope; // Added scope
         this.autoUpdate = asset.auto_update;
         this.inProgress = asset.in_progress;
     }
@@ -88,6 +89,12 @@ class Asset {
     setInProgress(inProgress) {
         this.inProgress = inProgress;
     }
+    getScope() {
+        return this.scope;
+    }
+    setScope(scope) {
+        this.scope = scope; 
+    }
 
     toJson() {
         return {
@@ -99,6 +106,7 @@ class Asset {
             value: this.value,
             user_weight: this.userWeight,
             aquired: this.acquired,
+            scope: this.scope,
             auto_update: this.autoUpdate,
             in_progress: this.inProgress
         };

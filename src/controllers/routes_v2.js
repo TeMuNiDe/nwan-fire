@@ -4,6 +4,7 @@ import UserDb from "../models/UserDb.js";
 import AssetDb from "../models/AssetDb.js";
 import LiabilityDb from "../models/LiabilityDb.js";
 import TransactionDb from "../models/TransactionDb.js";
+import User from "../models/User.js";
 
 export default class RouteManagerV2 {
     api_router;
@@ -60,10 +61,31 @@ export default class RouteManagerV2 {
             }
         });
 
-        this.api_router.route('/users/:id/networth').get((req, res) => {
-            const user = get_sample_user(); // Assuming get_sample_user returns a User object
+        this.api_router.route('/users/:id/networth').post((req, res) => {
+            const user = get_sample_user();
             if (user && user.get_Id() === req.params.id) {
-                res.json(user.getNetWorth());
+                const assets = get_sample_assets();
+                const liabilities = get_sample_liabilities();
+
+                const { start_date, end_date, aggregation } = req.body;
+
+                let startDateObj = start_date ? new Date(parseInt(start_date)) : null;
+                let endDateObj = end_date ? new Date(parseInt(end_date)) : null;
+                const agg = aggregation || 'monthly'; // Default to monthly if not provided
+
+                // If no dates are provided, set a default range (e.g., last year)
+                if (!startDateObj || !endDateObj) {
+                    endDateObj = new Date();
+                    startDateObj = new Date();
+                    startDateObj.setFullYear(endDateObj.getFullYear() - 1); // Default to last year
+                }
+
+                try {
+                    const netWorthData = User.calculateNetWorth(assets, liabilities, startDateObj, endDateObj, agg);
+                    res.json(netWorthData);
+                } catch (error) {
+                    res.status(500).json({ "error": error.message });
+                }
             } else {
                 res.status(404).json({ "error": "Net worth data not found for user" });
             }
@@ -72,37 +94,16 @@ export default class RouteManagerV2 {
         this.api_router.route('/users/:id/capacity').get(async (req, res) => {
             try {
                 const userId = req.params.id;
-                const user = get_sample_user(); // For now, using sample user as per existing logic
+                const user = get_sample_user();
                 
                 if (!user || user.get_Id() !== userId) {
                     return res.status(404).json({ "error": "User not found" });
                 }
 
-                const transactions = get_sample_transactions(); // Assuming get_sample_transactions returns an array of Transaction objects
-                
-                let totalIncome = 0;
-                let totalExpense = 0;
+                const transactions = get_sample_transactions();
+                const capacity = User.calculateInvestmentCapacity(user, transactions);
 
-                if (transactions) {
-                    transactions.forEach(transaction => {
-                        if (transaction.source === 'income') {
-                            totalIncome += transaction.amount;
-                        } else if (transaction.target === 'expense') {
-                            totalExpense += transaction.amount;
-                        }
-                    });
-                }
-
-                const investmentCapacity = totalIncome - totalExpense;
-                const riskScore = user.getRiskScore(); // Assuming risk_score is a factor between 0 and 1
-                const aggressiveCapacity = riskScore * investmentCapacity;
-                const conservativeCapacity = investmentCapacity - aggressiveCapacity;
-
-                res.json({
-                    investmentCapacity: investmentCapacity,
-                    aggressiveCapacity: aggressiveCapacity,
-                    conservativeCapacity: conservativeCapacity
-                });
+                res.json(capacity);
 
             } catch (error) {
                 res.status(500).json({ "error": error.message });
@@ -129,7 +130,7 @@ export default class RouteManagerV2 {
                 const allAssets = get_sample_assets(); 
                 const filteredAssets = allAssets.filter(asset => {
                     // Simple filter logic: check if all key-value pairs in filter match the asset
-                    return Object.keys(filter).every(key => asset[key] === filter[key]);
+                    return Object.keys(filter).every(key => asset.toJson()[key] === filter[key]);
                 });
 
                 if (filteredAssets.length > 0) {
@@ -265,15 +266,62 @@ export default class RouteManagerV2 {
                     return res.status(400).json({ "error": "start_date and end_date are required in the request body." });
                 }
 
-                const transactions = await this.transactionDb.getTransactionsInDateRange(userId, start_date, end_date);
+                // const transactions = await this.transactionDb.getTransactionsInDateRange(userId, start_date, end_date);
+                const allSampleTransactions = get_sample_transactions();
 
-                if (transactions) {
-                    res.json(transactions);
+                const startDateObj = new Date(start_date);
+                const endDateObj = new Date(end_date);
+
+                const filteredTransactions = allSampleTransactions.filter(transaction => {
+                    const transactionDate = new Date(transaction.date);
+                    return transactionDate >= startDateObj && transactionDate <= endDateObj;
+                });
+
+                if (filteredTransactions.length > 0) {
+                    res.json(filteredTransactions.map(transaction => transaction.toJson()));
                 } else {
                     res.status(404).json({ "error": "No transactions found for user in the specified date range." });
                 }
             } catch (error) {
                 res.status(500).json({ "error": error.message });
+            }
+        });
+
+        // Generic Asset Property Endpoint
+        this.api_router.route('/users/:userId/assets/:id/:property').get((req, res) => {
+            const assetId = req.params.id;
+            const property = req.params.property;
+            const assets = get_sample_assets();
+            const asset = assets.find(a => a.get_Id() === assetId);
+
+            if (asset) {
+                const assetJson = asset.toJson();
+                if (assetJson.hasOwnProperty(property)) {
+                    res.json({ [property]: assetJson[property] });
+                } else {
+                    res.status(404).json({ "error": `Property '${property}' not found for asset with ID '${assetId}'` });
+                }
+            } else {
+                res.status(404).json({ "error": `Asset with ID '${assetId}' not found` });
+            }
+        });
+
+        // Generic Liability Property Endpoint
+        this.api_router.route('/users/:userId/liabilities/:id/:property').get((req, res) => {
+            const liabilityId = req.params.id;
+            const property = req.params.property;
+            const liabilities = get_sample_liabilities();
+            const liability = liabilities.find(l => l.get_Id() === liabilityId);
+
+            if (liability) {
+                const liabilityJson = liability.toJson();
+                if (liabilityJson.hasOwnProperty(property)) {
+                    res.json({ [property]: liabilityJson[property] });
+                } else {
+                    res.status(404).json({ "error": `Property '${property}' not found for liability with ID '${liabilityId}'` });
+                }
+            } else {
+                res.status(404).json({ "error": `Liability with ID '${liabilityId}' not found` });
             }
         });
     }
