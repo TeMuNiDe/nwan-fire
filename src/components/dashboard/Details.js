@@ -115,7 +115,7 @@ function Details() {
               <TableCell sx={{ fontWeight: 'bold', width: '25%' }}>Name</TableCell>
               <TableCell sx={{ fontWeight: 'bold', width: '25%' }}>Type</TableCell>
               <TableCell sx={{ fontWeight: 'bold', width: '25%' }}>Value</TableCell>
-              <TableCell sx={{ fontWeight: 'bold', width: '25%' }}>Term</TableCell>
+              <TableCell sx={{ fontWeight: 'bold', width: '25%' }}>Age</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
