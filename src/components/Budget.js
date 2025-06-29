@@ -40,7 +40,7 @@ function Budget() {
 
       try {
         // Fetch capacity data
-        const capacityResponse = await fetch(`${API_URL}users/${userId}/capacity`);
+        const capacityResponse = await fetch(`${API_URL}/users/${userId}/capacity`);
         if (!capacityResponse.ok) {
           throw new Error(`HTTP error! status: ${capacityResponse.status}`);
         }
@@ -50,7 +50,7 @@ function Budget() {
         setShortTermCapacity(capacityData.conservativeCapacity); // Map conservative to short term
 
         // Fetch in_progress assets
-        const assetsResponse = await fetch(`${API_URL}users/${userId}/assets/filter`, {
+        const assetsResponse = await fetch(`${API_URL}/users/${userId}/assets/filter`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

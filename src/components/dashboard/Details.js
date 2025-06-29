@@ -21,12 +21,30 @@ function Details() {
         }
         const data = await response.json();
         if (data) {
-          const formattedAssets = data.map(asset => ({
-            name: asset.name,
-            type: asset.type,
-            value: asset.value && asset.value.length > 0 ? asset.value[asset.value.length - 1].value : 0,
-            term: 'N/A', // Term is not available in sample data, setting to N/A
-          }));
+            const formattedAssets = data.map(asset => {
+            const acquiredDate = asset.aquired ? new Date(asset.aquired) : null;
+            let age = 'N/A';
+            if (acquiredDate && !isNaN(acquiredDate)) {
+              const now = new Date();
+              const diffMs = now - acquiredDate;
+              const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+              if (diffDays < 90) {
+              age = `${diffDays} days`;
+              } else if (diffDays < 1095) { // 3 years * 365
+              const diffMonths = Math.floor(diffDays / 30);
+              age = `${diffMonths} months`;
+              } else {
+              const diffYears = Math.floor(diffDays / 365);
+              age = `${diffYears} years`;
+              }
+            }
+            return {
+              name: asset.name,
+              type: asset.type,
+              value: asset.value && asset.value.length > 0 ? asset.value[asset.value.length - 1].value : 0,
+              age,
+            };
+            });
           setAssets(formattedAssets);
           setTotalAssets(formattedAssets.reduce((sum, asset) => sum + asset.value, 0));
         }
@@ -43,12 +61,30 @@ function Details() {
         }
         const data = await response.json();
         if (data) {
-          const formattedLiabilities = data.map(liability => ({
-            name: liability.name,
-            type: liability.type,
-            value: liability.value && liability.value.length > 0 ? liability.value[liability.value.length - 1].value : 0,
-            term: 'N/A', // Term is not available in sample data, setting to N/A
-          }));
+            const formattedLiabilities = data.map(liability => {
+            const acquiredDate = liability.aquired ? new Date(liability.aquired) : null;
+            let age = 'N/A';
+            if (acquiredDate && !isNaN(acquiredDate)) {
+              const now = new Date();
+              const diffMs = now - acquiredDate;
+              const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+              if (diffDays < 90) {
+              age = `${diffDays} days`;
+              } else if (diffDays < 1095) { // 3 years * 365
+              const diffMonths = Math.floor(diffDays / 30);
+              age = `${diffMonths} months`;
+              } else {
+              const diffYears = Math.floor(diffDays / 365);
+              age = `${diffYears} years`;
+              }
+            }
+            return {
+              name: liability.name,
+              type: liability.type,
+              value: liability.value && liability.value.length > 0 ? liability.value[liability.value.length - 1].value : 0,
+              age,
+            };
+            });
           setLiabilities(formattedLiabilities);
           setTotalLiabilities(formattedLiabilities.reduce((sum, liability) => sum + liability.value, 0));
         }
@@ -88,7 +124,7 @@ function Details() {
                 <TableCell>{item.name}</TableCell>
                 <TableCell>{item.type}</TableCell>
                 <TableCell>{item.value.toLocaleString('en-US', { style: 'currency', currency: 'INR' })}</TableCell>
-                <TableCell>{item.term}</TableCell>
+                <TableCell>{item.age}</TableCell>
               </TableRow>
             ))}
           </TableBody>
