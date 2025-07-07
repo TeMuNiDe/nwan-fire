@@ -160,7 +160,7 @@ function Budget() {
   return (
     <Box sx={{ p: 3 }}>
       <Grid container spacing={4} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6}>
+        <Grid size={{xs:12, md:6}}>
           <Card variant="outlined" sx={{ textAlign: 'center', p: 2 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -178,7 +178,7 @@ function Budget() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid size={{xs:12,md:6}}>
           <Card variant="outlined" sx={{ textAlign: 'center', p: 2 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -208,7 +208,7 @@ function Budget() {
             <TableRow>
               <TableCell>Name</TableCell>
               <TableCell>Type</TableCell>
-              <TableCell align="Left">Amount</TableCell>
+              <TableCell align="left">Amount</TableCell>
               <TableCell>Percentage of Term</TableCell>
               <TableCell>Percentage of Total</TableCell>
               <TableCell align="center">Actions</TableCell>
@@ -241,7 +241,7 @@ function Budget() {
                     </Select>
                   </FormControl>
                 </TableCell>
-                <TableCell align="Left">
+                <TableCell align="left">
                   <TextField
                     fullWidth
                     type="number"

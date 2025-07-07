@@ -1,5 +1,6 @@
 const schema = require('./schema');
 const { validateObject } = require('../utils/validator');
+const { startOfDay, isSameDay, isBefore } = require('date-fns');
 
 class Liability {
     constructor(liability) {
@@ -10,8 +11,9 @@ class Liability {
         this.name = liability.name;
         this.description = liability.description; // Added description
         this.type = liability.type;
-        this.value = liability.value;
-        this.acquired = liability.aquired;
+        // Ensure value is always an array of {date, value} objects
+        this.value = Array.isArray(liability.value) ? liability.value : [];
+        this.acquired = liability.acquired;
         this.autoUpdate = liability.auto_update;
     }
 
@@ -51,16 +53,44 @@ class Liability {
         return this.value;
     }
 
-    setValue(value) {
-        this.value = value;
+    setValue(newValue) {
+        const today = startOfDay(new Date());
+        const todayEpoch = today.getTime(); // Get epoch timestamp
+
+        if (!Array.isArray(this.value)) {
+            this.value = [];
+        }
+
+        if (this.value.length > 0) {
+            const lastEntry = this.value[this.value.length - 1];
+            // Convert lastEntry.date to Date object for comparison, assuming it's an epoch timestamp
+            if (isSameDay(new Date(lastEntry.date), today)) {
+                // Update the last entry if it's from today
+                lastEntry.value = newValue;
+                lastEntry.date = todayEpoch; // Ensure date is start of today
+            } else {
+                // Append new entry if not from today
+                this.value.push({ date: todayEpoch, value: newValue });
+            }
+        } else {
+            // If no entries, add the first one
+            this.value.push({ date: todayEpoch, value: newValue });
+        }
     }
 
     getAcquired() {
         return this.acquired;
     }
 
-    setAcquired(acquired) {
-        this.acquired = acquired;
+    setAcquired(acquiredDate) {
+        this.acquired = acquiredDate;
+        if (this.value && Array.isArray(this.value)) {
+            const acquiredStartOfDay = startOfDay(new Date(acquiredDate));
+            this.value = this.value.filter(entry => {
+                const entryDate = startOfDay(new Date(entry.date));
+                return !isBefore(entryDate, acquiredStartOfDay);
+            });
+        }
     }
 
     getAutoUpdate() {
@@ -71,7 +101,7 @@ class Liability {
         this.autoUpdate = autoUpdate;
     }
 
-    toJson() {
+    toJSON() {
         return {
             user: this.user,
             _id: this._id,
@@ -79,7 +109,7 @@ class Liability {
             description: this.description,
             type: this.type,
             value: this.value,
-            aquired: this.acquired,
+            acquired: this.acquired,
             auto_update: this.autoUpdate
         };
     }

@@ -16,14 +16,18 @@ import {
   TextField,
   Divider,
   Grid,
+  Button,
 } from '@mui/material';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfDay, endOfDay } from 'date-fns';
+import AddIcon from '@mui/icons-material/Add';
 
 import Distribution from './Distribution';
 import { useUser } from '../../contexts/UserContext';
+import TransactionDialog from '../dialogs/TransactionDialog';
+import AppSnackbar from '../common/AppSnackbar'; // Import AppSnackbar
 
 function Transactions() {
   const { userId } = useUser();
@@ -34,9 +38,16 @@ function Transactions() {
   const [openDatePicker, setOpenDatePicker] = useState(false);
   const [transactions, setTransactions] = useState([]);
   const [displayNamesCache, setDisplayNamesCache] = useState(new Map());
-  const API_URL = process.env.REACT_APP_API_URL
+  const API_URL = process.env.REACT_APP_API_URL;
 
-  const pathMap = {asset: 'assets',liability: 'liabilities'}
+  const [openTransactionDialog, setOpenTransactionDialog] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+
+  const pathMap = { asset: 'assets', liability: 'liabilities' };
 
   const fetchProperty = async (type, id, property) => {
     const cacheKey = `${type}-${id}-${property}`;
@@ -98,37 +109,41 @@ function Transactions() {
     }
   }, [dateRange]);
 
-  useEffect(() => {
-    const fetchTransactions = async () => {
-      if (startDate && endDate && userId) {
-        try {
-          const response = await fetch(`${API_URL}/users/${userId}/transactions/query-by-date`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              start_date: startDate.getTime(),
-              end_date: endDate.getTime(),
-            }),
-          });
+  const fetchTransactions = async () => {
+    if (startDate && endDate && userId) {
+      try {
+        const response = await fetch(`${API_URL}/users/${userId}/transactions/query-by-date`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            start_date: startDate.getTime(),
+            end_date: endDate.getTime(),
+          }),
+        });
 
-          if (!response.ok) {
-            throw new Error('Failed to fetch transactions');
-          }
-          const data = await response.json();
-          setTransactions(data);
-        } catch (error) {
-          console.error('Error fetching transactions:', error);
-          setTransactions([]);
+        if (!response.ok) {
+          throw new Error('Failed to fetch transactions');
         }
-      } else {
+        const data = await response.json();
+        setTransactions(data);
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
         setTransactions([]);
       }
-    };
+    } else {
+      setTransactions([]);
+    }
+  };
 
+  useEffect(() => {
     fetchTransactions();
   }, [startDate, endDate, userId]);
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
 
   useEffect(() => {
     const resolveDisplayNames = async () => {
@@ -177,110 +192,159 @@ function Transactions() {
     setEndDate(date);
   };
 
+  const handleOpenNewTransactionDialog = () => {
+    setSelectedTransaction(null);
+    setOpenTransactionDialog(true);
+  };
+
+  const handleOpenEditTransactionDialog = (transaction) => {
+    setSelectedTransaction(transaction);
+    setOpenTransactionDialog(true);
+  };
+
+  const handleCloseTransactionDialog = (refreshNeeded) => {
+    setOpenTransactionDialog(false);
+    setSelectedTransaction(null);
+    if (refreshNeeded) {
+      fetchTransactions(); // Refresh transactions list only if save/delete was successful
+      //setSnackbarMessage('Operation successful!');
+      //setSnackbarSeverity('success');
+      //setSnackbarOpen(true);
+    }
+  };
+
   const totalAmount = transactions.reduce((sum, transaction) => sum + transaction.amount, 0);
 
   return (
+    <Box >
     <Grid container spacing={2} justifyContent="center">
-      <Grid item size={12}>
-    <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Typography variant="h4" sx={{ mr: 1 }}>$</Typography>
-          <Box>
-            <Typography variant="h6" gutterBottom sx={{ mb: 0 }}>
-              Transactions
-            </Typography>
-            <Typography variant="h5" color="text.secondary">
-              {totalAmount.toLocaleString()}
-            </Typography>
+      <Grid  size={12}>
+        <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography variant="h4" sx={{ mr: 1 }}>$</Typography>
+              <Box>
+                <Typography variant="h6" gutterBottom sx={{ mb: 0 }}>
+                  Transactions
+                </Typography>
+                <Typography variant="h5" color="text.secondary">
+                  {totalAmount.toLocaleString()}
+                </Typography>
+              </Box>
+            </Box>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                variant="contained"
+                startIcon={<AddIcon />}
+                onClick={handleOpenNewTransactionDialog}
+              >
+                Add New
+              </Button>
+              <FormControl sx={{ minWidth: 120 }}>
+                <InputLabel id="date-range-select-label">Filter</InputLabel>
+                <Select
+                  labelId="date-range-select-label"
+                  id="date-range-select"
+                  value={dateRange}
+                  label="Filter"
+                  onChange={handleDateRangeChange}
+                >
+                  <MenuItem value="Today">Today</MenuItem>
+                  <MenuItem value="This week">This week</MenuItem>
+                  <MenuItem value="This Month">This Month</MenuItem>
+                  <MenuItem value="Custom Range">Custom Range</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
           </Box>
-        </Box>
-        <FormControl sx={{ minWidth: 120 }}>
-          <InputLabel id="date-range-select-label">Filter</InputLabel>
-          <Select
-            labelId="date-range-select-label"
-            id="date-range-select"
-            value={dateRange}
-            label="Filter"
-            onChange={handleDateRangeChange}
-          >
-            <MenuItem value="Today">Today</MenuItem>
-            <MenuItem value="This week">This week</MenuItem>
-            <MenuItem value="This Month">This Month</MenuItem>
-            <MenuItem value="Custom Range">Custom Range</MenuItem>
-          </Select>
-        </FormControl>
-      </Box>
 
-      {openDatePicker && dateRange === 'Custom Range' && (
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
-          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-            <DatePicker
-              label="Start Date"
-              value={startDate}
-              maxDate={endDate}
-              onChange={handleStartDateChange}
-              renderInput={(params) => <TextField {...params} />}
-            />
-            <DatePicker
-              label="End Date"
-              value={endDate}
-              minDate={startDate}
-              onChange={handleEndDateChange}
-              renderInput={(params) => <TextField {...params} />}
-            />
-          </Box>
-        </LocalizationProvider>
-      )}
+          {openDatePicker && dateRange === 'Custom Range' && (
+            <LocalizationProvider dateAdapter={AdapterDateFns}>
+              <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
+                <DatePicker
+                  label="Start Date"
+                  value={startDate}
+                  maxDate={endDate}
+                  onChange={handleStartDateChange}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+                <DatePicker
+                  label="End Date"
+                  value={endDate}
+                  minDate={startDate}
+                  onChange={handleEndDateChange}
+                  renderInput={(params) => <TextField {...params} />}
+                />
+              </Box>
+            </LocalizationProvider>
+          )}
 
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: '#f8f0fc' }}>
-              <TableCell>Name</TableCell>
-              <TableCell>Category</TableCell>
-              <TableCell>Amount</TableCell>
-              <TableCell>Source</TableCell>
-              <TableCell>Target</TableCell>
-              <TableCell>Date</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {transactions.map((transaction) => (
-              <TableRow key={transaction._id}>
-                <TableCell>{transaction.name}</TableCell>
-                <TableCell>{transaction.category}</TableCell>
-                <TableCell>${transaction.amount}</TableCell>
-                <TableCell>
-                  {transaction.source === 'income' || transaction.source === 'expense'
-                    ? transaction.source.charAt(0).toUpperCase() + transaction.source.slice(1)
-                    : displayNamesCache.get(`${transaction.source}-${transaction.source_id}-name`) || 'Loading...'}
-                </TableCell>
-                <TableCell>
-                  {transaction.target === 'income' || transaction.target === 'expense'
-                    ? transaction.target.charAt(0).toUpperCase() + transaction.target.slice(1)
-                    : displayNamesCache.get(`${transaction.target}-${transaction.target_id}-name`) || 'Loading...'}
-                </TableCell>
-                <TableCell>{format(new Date(transaction.date), 'yyyy-MM-dd')}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Paper>
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ backgroundColor: '#f8f0fc' }}>
+                  <TableCell>Name</TableCell>
+                  <TableCell>Category</TableCell>
+                  <TableCell>Amount</TableCell>
+                  <TableCell>Source</TableCell>
+                  <TableCell>Target</TableCell>
+                  <TableCell>Date</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {transactions.map((transaction) => (
+                  <TableRow
+                    key={transaction._id}
+                    onClick={() => handleOpenEditTransactionDialog(transaction)}
+                    sx={{ '&:hover': { cursor: 'pointer', backgroundColor: '#f5f5f5' } }}
+                  >
+                    <TableCell>{transaction.name}</TableCell>
+                    <TableCell>{transaction.category}</TableCell>
+                    <TableCell>${transaction.amount}</TableCell>
+                    <TableCell>
+                      {transaction.source === 'income' || transaction.source === 'expense'
+                        ? transaction.source.charAt(0).toUpperCase() + transaction.source.slice(1)
+                        : displayNamesCache.get(`${transaction.source}-${transaction.source_id}-name`) || 'Loading...'}
+                    </TableCell>
+                    <TableCell>
+                      {transaction.target === 'income' || transaction.target === 'expense'
+                        ? transaction.target.charAt(0).toUpperCase() + transaction.target.slice(1)
+                        : displayNamesCache.get(`${transaction.target}-${transaction.target_id}-name`) || 'Loading...'}
+                    </TableCell>
+                    <TableCell>{format(new Date(transaction.date), 'yyyy-MM-dd')}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
       </Grid>
-      <Grid item size={12}>
-      <Divider sx={{ my: 2 }} />
+      <Grid size={{xs:12}}>
+        <Divider sx={{ my: 2 }} />
       </Grid>
-      <Grid item size={12}>
-      <Distribution
-        transactions={transactions}
-        startDate={startDate}
-        endDate={endDate}
-        getDisplayName={getDisplayName}
-      />
+      <Grid size={{xs:12}}>
+        <Distribution
+          transactions={transactions}
+          startDate={startDate}
+          endDate={endDate}
+          getDisplayName={getDisplayName}
+        />
       </Grid>
+
+     
     </Grid>
+    <TransactionDialog
+        open={openTransactionDialog}
+        onClose={handleCloseTransactionDialog}
+        itemData={selectedTransaction}
+      />
+      <AppSnackbar
+        open={snackbarOpen}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
+        onClose={handleSnackbarClose}
+      />
+    </Box>
   );
 }
 

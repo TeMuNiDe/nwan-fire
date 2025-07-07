@@ -60,7 +60,7 @@ function Distribution({ transactions}) {
       </Typography>
       <Grid container spacing={2}>
         {/* Pie Chart 1: Expenses by Category */}
-        <Grid item size={{xs:12, md:6}}>
+        <Grid size={{xs:12, md:6}}>
           <Typography variant="subtitle1" align="center" gutterBottom>
             Expenses by Category
           </Typography>
@@ -93,7 +93,7 @@ function Distribution({ transactions}) {
         </Grid>
 
         {/* Pie Chart 2: Transactions by Target Type */}
-        <Grid item size={{xs:12, md:6}}>
+        <Grid size={{xs:12, md:6}}>
           <Typography variant="subtitle1" align="center" gutterBottom>
             Transactions by Target Type
           </Typography>

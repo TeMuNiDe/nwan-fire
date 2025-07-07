@@ -11,10 +11,10 @@ function CashFlow() {
         Cash Flow
       </Typography>
       <Grid container spacing={2} justifyContent="center">
-        <Grid item size={12}>
+        <Grid size={12}>
       <Trend />
         </Grid>
-        <Grid item size={12} >
+        <Grid size={12} >
       <Transactions />
         </Grid>
       </Grid>

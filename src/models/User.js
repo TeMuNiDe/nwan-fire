@@ -75,7 +75,7 @@ class User {
         this.dateOfBirth = dateOfBirth;
     }
 
-    toJson() {
+    toJSON() {
         return {
             _id: this._id,
             name: this.name,

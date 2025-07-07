@@ -70,7 +70,7 @@ function Investments() {
     <Paper elevation={3} sx={{ p: 2, mb: 2 }}>
       <Grid container spacing={2} justifyContent="center">
         {/* Chart 1: By Type */}
-        <Grid item size={{ xs: 12, sm: 12, md: 12, lg:6 }} >
+        <Grid size={{ xs: 12, sm: 12, md: 12, lg:6 }} >
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Typography variant="subtitle1" gutterBottom>
              Assets Type
@@ -98,7 +98,7 @@ function Investments() {
         </Grid>
 
         {/* Chart 2: By Scope */}
-        <Grid item size={{ xs: 12, sm: 12, md: 12,lg:6  }}>
+        <Grid size={{ xs: 12, sm: 12, md: 12,lg:6  }}>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <Typography variant="subtitle1" gutterBottom>
               Assets Scope

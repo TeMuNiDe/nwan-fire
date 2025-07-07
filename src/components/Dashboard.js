@@ -13,13 +13,13 @@ function Dashboard() {
         Dashboard
       </Typography>
       <Grid container spacing={2} justifyContent="center">
-      <Grid item size={12} >
+      <Grid size={12} >
       <Networth />
       </Grid>
-      <Grid item size={12} >
+      <Grid size={12} >
       <Details />
       </Grid>
-      <Grid item size={12} >
+      <Grid size={12} >
       <Investments />
       </Grid>
       </Grid>

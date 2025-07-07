@@ -18,6 +18,12 @@ function validateObject(obj, schemaDef, objName) {
         const value = obj[key];
         const propSchema = schemaDef.properties[key];
 
+        if (key === '_id' && value===null) {
+            // Allow _id to be null for new objects
+            continue;
+
+        }
+
         if (!propSchema) {
             // Allow extra properties for now, or throw an error if strict schema is desired
             // throw new Error(`${objName} validation error: Unexpected field '${key}'.`);

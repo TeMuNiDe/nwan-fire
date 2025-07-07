@@ -18,11 +18,12 @@
             "request": "launch",
             "name": "Debug server",
             "runtimeExecutable": "npm",
+            "port": 9229,
             "runtimeArgs": [
                 "run-script",
                 "server"
             ],
-            "port": 9229
+            
         }
     ]
 }

@@ -1,5 +1,13 @@
 const schema = require('./schema');
 const { validateObject } = require('../utils/validator');
+const {
+    startOfDay, endOfDay,
+    startOfWeek, endOfWeek,
+    startOfMonth, endOfMonth,
+    startOfYear, endOfYear,
+    addDays, addWeeks, addMonths, addYears,
+    isBefore,isAfter, isEqual, format
+} = require('date-fns');
 
 class Transaction {
     constructor(transaction) {
@@ -95,7 +103,7 @@ class Transaction {
         this.targetId = targetId;
     }
 
-    toJson() {
+    toJSON() {
         return {
             user: this.user,
             _id: this._id,
@@ -109,6 +117,78 @@ class Transaction {
             target: this.target,
             target_id: this.targetId
         };
+    }
+
+    /**
+     * Aggregates transaction data into income and expenditure trends over a period.
+     * @param {Array} transactions - Array of raw transaction objects.
+     * @param {Date} startDate - The start date for the aggregation.
+     * @param {Date} endDate - The end date for the aggregation.
+     * @param {string} aggregation - 'daily', 'weekly', 'monthly', 'yearly'.
+     * @returns {Array} An array of {date, income, expenditure} objects.
+     */
+    static getTrendData(transactions, startDate, endDate, aggregation) {
+        const result = [];
+        let currentDate = startDate;
+
+        while (isBefore(currentDate, endDate) || isEqual(currentDate, endDate)) {
+            let periodStartDate, periodEndDate;
+            let nextDate;
+
+            switch (aggregation) {
+                case 'daily':
+                    periodStartDate = startOfDay(currentDate);
+                    periodEndDate = endOfDay(currentDate);
+                    nextDate = addDays(currentDate, 1);
+                    break;
+                case 'weekly':
+                    periodStartDate = startOfWeek(currentDate, { weekStartsOn: 0 });
+                    periodEndDate = endOfWeek(currentDate, { weekStartsOn: 0 });
+                    nextDate = addWeeks(currentDate, 1);
+                    break;
+                case 'monthly':
+                    periodStartDate = startOfMonth(currentDate);
+                    periodEndDate = endOfMonth(currentDate);
+                    nextDate = addMonths(currentDate, 1);
+                    break;
+                case 'yearly':
+                    periodStartDate = startOfYear(currentDate);
+                    periodEndDate = endOfYear(currentDate);
+                    nextDate = addYears(currentDate, 1);
+                    break;
+                default:
+                    throw new Error('Invalid aggregation type');
+            }
+
+            // Clamp period dates to the overall start and end dates
+            const effectivePeriodStartDate = (isBefore(periodStartDate, startDate)) ? startDate : periodStartDate;
+            const effectivePeriodEndDate = (isAfter(periodEndDate, endDate)) ? endDate : periodEndDate;
+
+            let totalIncome = 0;
+            let totalExpenditure = 0;
+
+            transactions.forEach(transaction => {
+                const transactionDate = new Date(transaction.date);
+                if ((isAfter(transactionDate, effectivePeriodStartDate) || isEqual(transactionDate, effectivePeriodStartDate)) &&
+                    (isBefore(transactionDate, effectivePeriodEndDate) || isEqual(transactionDate, effectivePeriodEndDate))) {
+                    if (transaction.source === 'income') {
+                        totalIncome += transaction.amount;
+                    } else if (transaction.target === 'expense') {
+                        totalExpenditure += transaction.amount;
+                    }
+                }
+            });
+
+            result.push({
+                date: periodStartDate.getTime(), // Epoch milliseconds
+                income: totalIncome,
+                expenditure: totalExpenditure,
+            });
+
+            currentDate = nextDate;
+        }
+
+        return result;
     }
 }
 

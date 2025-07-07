@@ -1,6 +1,6 @@
 {
     "users":[{
-        "_id": "0",
+        "_id": "d9d4f0e8ce48c32f7465090c9a0011a2",
         "name": "John Doe",
         "email": "john@example.com",
         "auth_token": "abcdef123456",
@@ -9,7 +9,7 @@
         "date_of_birth": 631152000000
     }],
     "assets":[
-        {"user": "0",
+        {"user": "d9d4f0e8ce48c32f7465090c9a0011a2",
         "_id": "1",
         "name": "Savings Account SBI",
         "type": "savings",
@@ -27,7 +27,7 @@
         "in_progress":false,
         "scope": "Liquid"
     },
-        {"user": "0",
+        {"user": "d9d4f0e8ce48c32f7465090c9a0011a2",
         "_id": "2",
         "name": "House",
         "type": "Real Estate",
@@ -44,7 +44,7 @@
         "auto_update":false,
         "in_progress":false,
         "scope": "Long Term"
-    },{"user": "0",
+    },{"user": "d9d4f0e8ce48c32f7465090c9a0011a2",
         "_id": "3",
         "name": "ICICI Balanced Advantage Fund",
         "type": "MF",
@@ -63,7 +63,7 @@
         "scope": "Short Term"
     }],
     "liabilities":[
-        {"user": "0",
+        {"user": "d9d4f0e8ce48c32f7465090c9a0011a2",
         "_id": "1",
         "name": "Mortgage",
         "description": "Home loan with SBI",
@@ -78,9 +78,9 @@
     }],
     "transactions":[
         {
-            "user": "0",
+            "user": "d9d4f0e8ce48c32f7465090c9a0011a2",
             "_id": "1",
-            "date": 1627735402000,
+            "date": 1627835402000,
             "amount": 100000,
             "source": "income",
             "source_id":"1",
@@ -92,7 +92,7 @@
             
         }
         ,{
-            "user": "0",
+            "user": "d9d4f0e8ce48c32f7465090c9a0011a2",
             "_id": "2",
             "date": 1627735402000,
             "amount": 1000,
@@ -106,9 +106,9 @@
             
         },
         {
-            "user": "0",
+            "user": "d9d4f0e8ce48c32f7465090c9a0011a2",
             "_id": "3",
-            "date": 1627735402000,
+            "date": 1627635402000,
             "amount": 1000,
             "source": "asset",
             "source_id":"1",

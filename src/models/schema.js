@@ -18,7 +18,7 @@ module.exports = {
                     },
                     "date_of_birth": { "type": "integer" }
                 },
-                "required": ["_id", "name", "email", "auth_token", "risk_score", "risk_tolerance", "date_of_birth"]
+                "required": ["name", "email", "auth_token", "risk_score", "risk_tolerance", "date_of_birth"]
             }
         },
         "assets": {
@@ -46,11 +46,11 @@ module.exports = {
                     },
                     "scope": {"type": "string",enum: ["Short Term", "Long Term","Liquid"]},
                     "user_weight": { "type": "number" },
-                    "aquired": { "type": "integer" },
+                    "acquired": { "type": "integer" },
                     "auto_update": { "type": "boolean" },
                     "in_progress": { "type": "boolean" }
                 },
-                "required": ["user", "_id", "name","description", "type", "value","code", "user_weight","scope", "aquired", "auto_update", "in_progress"]
+                "required": ["user", "name","description", "type", "value","code","units", "user_weight","scope", "acquired", "auto_update", "in_progress"]
             }
         },
         "liabilities": {
@@ -74,10 +74,10 @@ module.exports = {
                             "required": ["date", "value"]
                         }
                     },
-                    "aquired": { "type": "integer" },
+                    "acquired": { "type": "integer" },
                     "auto_update": { "type": "boolean" }
                 },
-                "required": ["user", "_id", "name","description", "type", "value", "aquired", "auto_update"]
+                "required": ["user", "name","description", "type", "value", "acquired", "auto_update"]
             }
         },
         "transactions": {
@@ -104,7 +104,7 @@ module.exports = {
                     "target_id": { "type": "string" }
                 },
                 "required": [
-                    "user", "_id", "date", "amount", "source", "source_id",
+                    "user", "date", "amount", "source", "source_id",
                     "category", "name", "description", "target", "target_id"
                 ]
             }

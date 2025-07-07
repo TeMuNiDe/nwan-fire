@@ -1,14 +1,8 @@
 import fetch from "node-fetch";
-import Ajv from "ajv";
-
-// Note: You will need to install ajv: npm install ajv
-
 class BaseDb {
-    constructor(dbName, schema) {
+    constructor(dbName) {
         this.dbName = dbName;
         this.dbHost = process.env.DB_HOST;
-        this.ajv = new Ajv();
-        this.validate = this.ajv.compile(schema);
     }
 
     _stripRev(doc) {
@@ -35,11 +29,6 @@ class BaseDb {
     }
 
     async postDocument(doc) {
-        if (!this.validate(doc)) {
-            console.error("Validation errors:", this.validate.errors);
-            throw new Error("Document failed schema validation.");
-        }
-
         // Rename 'id' to '_id' if 'id' exists and '_id' does not
         if (doc.id && !doc._id) {
             doc._id = doc.id;
@@ -47,9 +36,13 @@ class BaseDb {
         }
 
         // If document already contains _id, it's a bad request for POST
-        if (doc._id) {
+        if (doc._id && doc._id !== null) {
             throw new Error("Document object should not contain _id for POST operations. Use PUT to update an existing document.");
+        } else if (doc._id === null) {
+            // If _id is explicitly set to null, we can proceed with POST
+            delete doc._id; // Remove _id to allow the server to generate a new one
         }
+
 
         let result = await fetch(`${this.dbHost}/${this.dbName}`, {
             method: "POST",
@@ -57,16 +50,11 @@ class BaseDb {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(doc)
-        }).then((res) => { if (res.status == 200) { return res.json() } else { return null } });
+        }).then((res) => { if (res.status == 201) { return res.json() } else { return null } });
         return result;
     }
 
     async putDocument(id, doc) {
-        if (!this.validate(doc)) {
-            console.error("Validation errors:", this.validate.errors);
-            throw new Error("Document failed schema validation.");
-        }
-
         // Get the existing document to retrieve its _rev
         let existingDocResponse = await fetch(`${this.dbHost}/${this.dbName}/${id}`, {
             method: "GET",
@@ -92,7 +80,7 @@ class BaseDb {
                 "Content-Type": "application/json",
             },
             body: JSON.stringify(doc)
-        }).then((res) => { if (res.status == 200) { return res.json() } else { return null } });
+        }).then((res) => { if (res.status == 201) { return res.json() } else { return null } });
         return result;
     }
 
