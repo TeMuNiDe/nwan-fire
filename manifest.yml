@@ -1,7 +1,0 @@
----
-applications:
- - name: nwan-fire-server
-   random-route: true
-   memory: 256M
-   command: npm start
-
