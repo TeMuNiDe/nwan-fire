@@ -1,4 +1,3 @@
-//import DBManager from './db_manager.js';
 import express, { Router } from 'express';
 import path from 'path';
 import cors from 'cors';
@@ -13,8 +12,8 @@ app.use(express.static(path.join(path.resolve(),'/build')));
 app.use('/api/v2',cors(),new RouteManagerV2().getApiRouter());
 
 
-app.get('*', function(req, res){
-  res.status(404).send('what???');
+app.get('*', function(req, res) {
+  res.sendFile(path.join(path.resolve(), '/build', 'index.html'));
 });
 
 var port = process.env.PORT_SERVER || 3000
