@@ -1,12 +1,6 @@
-vcap-local.json
 node_modules
 build*
 server*
-vcap*
-src/vcap*
 .env
-.storybook
 .vs
-.ibm-project
-2.3.3
 *.fig
