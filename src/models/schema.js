@@ -108,7 +108,30 @@ module.exports = {
                     "category", "name", "description", "target", "target_id"
                 ]
             }
+        },
+        "conversations": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "_id": { "type": "string" },
+                    "user": { "type": "string" },
+                    "contents": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "role": { "type": "string" },
+                                "text": { "type": "string" }
+                            },
+                            "required": ["role", "text"]
+                        }
+                    },
+                    "timestamp": { "type": "integer" }
+                },
+                "required": ["user", "contents", "timestamp"]
+            }
         }
-    },
-    "required": ["users", "assets", "liabilities", "transactions"]
+    }
+    
 };

@@ -2,6 +2,7 @@ import express, { Router } from 'express';
 import path from 'path';
 import cors from 'cors';
 import RouteManagerV2 from './controllers/routes_v2.js';
+import chatRouter from './bot/chat_controller.js'; // Import the new chat router
 
 var app  = express();
 
@@ -10,7 +11,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.static(path.join(path.resolve(),'/build')));
 //app.use('/api',cors(),new RouteManager().getApiRouter());
 app.use('/api/v2',cors(),new RouteManagerV2().getApiRouter());
-
+app.use('/chat', cors(), chatRouter());
 
 app.get('*', function(req, res) {
   res.sendFile(path.join(path.resolve(), '/build', 'index.html'));
