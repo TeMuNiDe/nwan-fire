@@ -4,9 +4,12 @@ import { functionDeclarations,functionCalls } from './api_tools.js';
 import logger from "../utils/logger.js"; // Import the logger utility
 import ConversationDb from '../models/ConversationDb.js';
 import Conversation from '../models/Conversation.js';
+import TransactionMappingDb from '../models/TransactionMappingDb.js';
+import TransactionMapping from '../models/TransactionMapping.js';
 
 const chatRouter = express.Router();
 const conversationDb = new ConversationDb();
+const transactionMappingDb = new TransactionMappingDb();
 
 export default () => {
       // Request logging middleware
@@ -83,9 +86,17 @@ export default () => {
                                 use ${userId} for userId and ${userName} for userName if required.
                                 Example: user details such as name, assets, liabilities, and transactions. Once you have sufficient information,
                                 you should provide a Consistent and Accurate response to the user.
-                                If you do not have sufficient information, you should ask the user for more information. 
+                                You can also add new transactions to the user's account. using the function call add_user_transaction
+                                Analyze the user's message and Automatically derive as many details as possible from the user's message and your knowledge.
+                                You can use the provided tools to retrieve information that is required. 
+                                If you do not have sufficient information to make the function call, you should ask the user.  
+                                Show all the details and confirm with the user before adding a new transaction.
                                 If the function call fails or returns an error, you should inform the user that you are unable to retrieve the information at this time and tell them the error message.
-                                You should not ask the user to provide any information that you already have.`,
+                                You should not ask the user to provide any information that you already have.
+
+                                When a user provides a message that appears to be a transaction, first call the \`classify_transaction\` tool.
+                                After receiving the classified transaction, review the output. If any required fields for adding a transaction (name, amount, date, description, category, source, target) are missing or unclear, you MUST ask the user for the missing information.
+                                Once all required details are confirmed, then call the \`add_user_transaction\` tool. Always confirm with the user before finalizing the addition of a new transaction.`,
             tools: [{
                 functionDeclarations: functionDeclarations
             }]
@@ -103,13 +114,45 @@ export default () => {
             while (response.functionCalls && response.functionCalls.length > 0) {
                 let functionResponses = [];               
                 for await (const functionCall of response.functionCalls) {
-                    let function_output = ""
+                    let function_output = "";
                     try {
-                       function_output = await functionCalls[functionCall.name](functionCall.args);
-                       if (!function_output.success) {
-                            throw new Error(`Function call failed: ${function_output.error}`);
+                        if (functionCall.name === "classify_transaction") {
+                            const userAssetsResponse = await functionCalls.get_user_assets({ userId });
+                            const userLiabilitiesResponse = await functionCalls.get_user_liabilities({ userId });
+                            const transactionMappings = await transactionMappingDb.getTransactionMappingsByUserId(userId);
+
+                            if (!userAssetsResponse.success) {
+                                throw new Error(`Failed to fetch user assets: ${userAssetsResponse.error}`);
+                            }
+                            if (!userLiabilitiesResponse.success) {
+                                throw new Error(`Failed to fetch user liabilities: ${userLiabilitiesResponse.error}`);
+                            }
+                            // transactionMappings can be empty, no error if null/undefined
+
+                            functionCall.args.userAssets = JSON.stringify(userAssetsResponse.output);
+                            functionCall.args.userLiabilities = JSON.stringify(userLiabilitiesResponse.output);
+                            functionCall.args.transactionMappings = JSON.stringify(transactionMappings ? transactionMappings.map(m => m.toJSON()) : []);
+
+                            function_output = await functionCalls.classify_transaction(functionCall.args);
+
+                            if (!function_output.success) {
+                                throw new Error(`Classification failed: ${function_output.error}`);
+                            }
+                        } else {
+                            function_output = await functionCalls[functionCall.name](functionCall.args);
+                            if (!function_output.success) {
+                                throw new Error(`Function call failed: ${function_output.error}`);
+                            }
+                            if (functionCall.name === "add_user_transaction" && function_output.output && function_output.output.transaction) {
+                                const { transaction, originalMessage } = function_output.output;
+                                const id = null;
+                                const timestamp = transaction.date ? new Date(transaction.date).getTime() : new Date().getTime();
+                                const newMapping = new TransactionMapping({id, originalMessage, transaction, timestamp});
+                                await transactionMappingDb.postTransactionMapping(newMapping);
+                                logger.log(`Transaction mapping saved: ${JSON.stringify(newMapping.toJSON())}`);
+                            }
                         }
-                       } catch (error) {
+                    } catch (error) {
                         function_output = {output: null, error: error.message};
                     }
                     const functionResponse = {

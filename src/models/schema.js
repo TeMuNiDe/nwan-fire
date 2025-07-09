@@ -131,6 +131,61 @@ module.exports = {
                 },
                 "required": ["user", "contents", "timestamp"]
             }
+        },
+        "transactionMappings": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "_id": { "type": "string" },
+                    "originalMessage": { "type": "string" },
+                    "transaction": {
+                        "type": "object",
+                        "properties": {
+                            "user": { "type": "string" },
+                            "_id": { "type": "string" },
+                            "date": { "type": "integer" },
+                            "amount": { "type": "number" },
+                            "source": { "type": "string" },
+                            "source_id": { "type": "string" },
+                            "category": { "type": "string" },
+                            "name": { "type": "string" },
+                            "description": { "type": "string" },
+                            "target": { "type": "string" },
+                            "target_id": { "type": "string" }
+                        },
+                        "required": ["user", "date", "amount", "source", "source_id", "category", "name", "description", "target", "target_id"]
+                    },
+                    "timestamp": { "type": "integer" }
+                },
+                "required": ["originalMessage", "transaction", "timestamp"]
+            }
+        },
+        "classified_transaction":{
+            "type": "object",
+                "properties": {
+                    "user": { "type": "string" },
+                    "_id": { "type": "string" },
+                    "date": { "type": "string" },
+                    "amount": { "type": "number" },
+                    "source": {
+                        "type": "string",
+                        "enum": ["income", "expense","asset", "liability"]
+                    },
+                    "source_id": { "type": "string" },
+                    "category": { "type": "string" },
+                    "name": { "type": "string" },
+                    "description": { "type": "string" },
+                    "target": {
+                        "type": "string" ,
+                        "enum": ["income","expense","asset", "liability"]
+                    },
+                    "target_id": { "type": "string" }
+                },
+                "required": [
+                    "user", "date", "amount", "source", "source_id",
+                    "category", "name", "description", "target", "target_id"
+                ]
         }
     }
     
