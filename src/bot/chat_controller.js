@@ -11,6 +11,9 @@ const chatRouter = express.Router();
 const conversationDb = new ConversationDb();
 const transactionMappingDb = new TransactionMappingDb();
 
+const geminiModels = process.env.GEMINI_MODELS ? process.env.GEMINI_MODELS.split(',') : [];
+let modelIndex = 0;
+
 export default () => {
       // Request logging middleware
 
@@ -43,7 +46,6 @@ export default () => {
 
     chatRouter.post('/', async (req, res) => {
         const { message, userId, userName, conversationId: incomingConversationId } = req.body; 
-        const gemini_model = process.env.GEMINI_MODEL;
         const gemini_api_key = process.env.GEMINI_API_KEY;
 
         let conversation;
@@ -53,10 +55,12 @@ export default () => {
         const userMessage = { role: "user", parts: [{ text: message }] };
 
         if (!incomingConversationId) {
+            modelIndex++;
             conversation = new Conversation({
                 user: userId,
                 contents: [userMessage],
-                timestamp: Date.now()
+                timestamp: Date.now(),
+                model: geminiModels[modelIndex % geminiModels.length]
             });
             await conversationDb.postConversation(conversation);
             currentConversationId = conversation.getId();
@@ -103,10 +107,10 @@ export default () => {
         };
 
         const ai = new GoogleGenAI({ apiKey:gemini_api_key });
-        
+        const gemini_model = geminiModels[modelIndex % geminiModels.length]
         try {
             let response = await ai.models.generateContent({
-                model: "gemini-2.5-flash",
+                model: gemini_model,
                 contents: conversationContents,
                 config: config 
             });
@@ -117,28 +121,28 @@ export default () => {
                     let function_output = "";
                     try {
                         if (functionCall.name === "classify_transaction") {
-                            const userAssetsResponse = await functionCalls.get_user_assets({ userId });
-                            const userLiabilitiesResponse = await functionCalls.get_user_liabilities({ userId });
-                            const transactionMappings = await transactionMappingDb.getTransactionMappingsByUserId(userId);
+            const userAssetsResponse = await functionCalls.get_user_assets({ userId });
+            const userLiabilitiesResponse = await functionCalls.get_user_liabilities({ userId });
+            const transactionMappings = await transactionMappingDb.getTransactionMappingsByUserId(userId);
 
-                            if (!userAssetsResponse.success) {
-                                throw new Error(`Failed to fetch user assets: ${userAssetsResponse.error}`);
-                            }
-                            if (!userLiabilitiesResponse.success) {
-                                throw new Error(`Failed to fetch user liabilities: ${userLiabilitiesResponse.error}`);
-                            }
-                            // transactionMappings can be empty, no error if null/undefined
+            if (!userAssetsResponse.success) {
+                throw new Error(`Failed to fetch user assets: ${userAssetsResponse.error}`);
+            }
+            if (!userLiabilitiesResponse.success) {
+                throw new Error(`Failed to fetch user liabilities: ${userLiabilitiesResponse.error}`);
+            }
+            // transactionMappings can be empty, no error if null/undefined
 
-                            functionCall.args.userAssets = JSON.stringify(userAssetsResponse.output);
-                            functionCall.args.userLiabilities = JSON.stringify(userLiabilitiesResponse.output);
-                            functionCall.args.transactionMappings = JSON.stringify(transactionMappings ? transactionMappings.map(m => m.toJSON()) : []);
+            functionCall.args.userAssets = JSON.stringify(userAssetsResponse.output);
+            functionCall.args.userLiabilities = JSON.stringify(userLiabilitiesResponse.output);
+            functionCall.args.transactionMappings = JSON.stringify(transactionMappings ? transactionMappings.map(m => m.toJSON()) : []);
 
-                            function_output = await functionCalls.classify_transaction(functionCall.args);
+            function_output = await functionCalls.classify_transaction({...functionCall.args, model: conversation.model});
 
-                            if (!function_output.success) {
-                                throw new Error(`Classification failed: ${function_output.error}`);
-                            }
-                        } else {
+            if (!function_output.success) {
+                throw new Error(`Classification failed: ${function_output.error}`);
+            }
+        } else {
                             function_output = await functionCalls[functionCall.name](functionCall.args);
                             if (!function_output.success) {
                                 throw new Error(`Function call failed: ${function_output.error}`);
@@ -168,7 +172,7 @@ export default () => {
                 });
                 await conversationDb.putConversation(currentConversationId, conversation);
                 conversationContents = conversation.getContents();
-                response = await ai.models.generateContent({model: "gemini-2.5-flash",contents: conversationContents,config: config});   
+                response = await ai.models.generateContent({model: conversation.model,contents: conversationContents,config: config});   
             } 
             const modelContent = response.candidates[0].content;
             conversation.addMessage(modelContent.role, modelContent.parts);

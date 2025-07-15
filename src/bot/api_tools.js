@@ -299,9 +299,10 @@ export const functionCalls = {
             return { success: false, error: error.response ? error.response.data : { message: error.message } };
         }
     },
-    classify_transaction: async ({ message, userId, userAssets, userLiabilities, transactionMappings }) => {
+    classify_transaction: async ({ message, userId, userAssets, userLiabilities, transactionMappings, model }) => {
         const { GoogleGenAI } = await import('@google/genai');
         const gemini_api_key = process.env.GEMINI_API_KEY;
+        const gemini_model = model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
         const ai = new GoogleGenAI({ apiKey: gemini_api_key });
 
         const systemInstruction = `You are a transaction classification agent. Your goal is to extract transaction details from a user's message and format them into a JSON object.
@@ -324,7 +325,7 @@ export const functionCalls = {
                                    Return only the JSON object. Do not include any other text or explanation.`;
         try {
             const result = await ai.models.generateContent({
-                model: "gemini-1.5-flash",
+                model: gemini_model,
                 contents: [{ role: "user", parts: [{ text: message }] }],
                 config:{
                 systemInstruction: systemInstruction,
