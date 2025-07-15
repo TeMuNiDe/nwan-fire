@@ -202,16 +202,16 @@ function Budget() {
         Investment Planning
       </Typography>
 
-      <TableContainer component={Card} variant="outlined">
-        <Table sx={{ minWidth: 650 }} aria-label="investment planning table">
+      <TableContainer component={Card} variant="outlined" sx={{ overflowX: 'auto' }}>
+        <Table sx={{ minWidth: 700 }} aria-label="investment planning table">
           <TableHead>
             <TableRow>
-              <TableCell>Name</TableCell>
-              <TableCell>Type</TableCell>
-              <TableCell align="left">Amount</TableCell>
-              <TableCell>Percentage of Term</TableCell>
-              <TableCell>Percentage of Total</TableCell>
-              <TableCell align="center">Actions</TableCell>
+              <TableCell sx={{ width: '15%' }}>Name</TableCell>
+              <TableCell sx={{ width: '15%' }}>Type</TableCell>
+              <TableCell align="left" sx={{ width: '15%' }}>Amount</TableCell>
+              <TableCell sx={{ width: '20%' }}>Percentage of Term</TableCell>
+              <TableCell sx={{ width: '20%' }}>Percentage of Total</TableCell>
+              <TableCell align="center" sx={{ width: '15%' }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -259,7 +259,7 @@ function Budget() {
                       borderRadius: '4px',
                       p: 1,
                       textAlign: 'center',
-                      minWidth: '100px',
+                      minWidth: '80px', // Adjusted minWidth
                     }}
                   >
                     <Typography variant="body2">{getPercentageOfTerm(row)}</Typography>
@@ -273,7 +273,7 @@ function Budget() {
                       borderRadius: '4px',
                       p: 1,
                       textAlign: 'center',
-                      minWidth: '100px',
+                      minWidth: '80px', // Adjusted minWidth
                     }}
                   >
                     <Typography variant="body2">{getPercentageOfTotal(row)}</Typography>

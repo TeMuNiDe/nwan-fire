@@ -17,6 +17,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { styled, useTheme } from '@mui/material/styles';
+import ChatIcon from '@mui/icons-material/Chat';
 import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
 
 // Import your main page components
@@ -31,24 +32,17 @@ const drawerWidth = 240;
 const Main = styled('main', { shouldForwardProp: (prop) => prop !== 'open' && prop !== 'isMobile' })(
   ({ theme, open, isMobile }) => ({
     flexGrow: 1,
-    padding: theme.spacing(3),
+    padding: theme.spacing(isMobile ? 1 : 3), // Responsive padding
     transition: theme.transitions.create('margin', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
-    marginLeft: `-${drawerWidth}px`, // Default to closed state for transition
-    ...(open && {
+    marginLeft: isMobile ? 0 : (open ? drawerWidth : theme.spacing(7)), // Adjust margin based on mobile and drawer state
+    ...(!isMobile && {
       transition: theme.transitions.create('margin', {
         easing: theme.transitions.easing.easeOut,
         duration: theme.transitions.duration.enteringScreen,
       }),
-      marginLeft: 0,
-    }),
-    ...(!open && { // Adjust margin when drawer is collapsed
-      marginLeft: theme.spacing(7), // Width of collapsed drawer
-    }),
-    ...(!isMobile && { // Apply margin for desktop view
-      // This margin is now applied to the outermost Box
     }),
   }),
 );
@@ -87,9 +81,14 @@ function AppLayout() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [open, setOpen] = useState(!isMobile); // Drawer open by default on desktop
+  const [isChatOpen, setIsChatOpen] = useState(true); // State for chat visibility
 
   const handleDrawerToggle = () => {
     setOpen(!open);
+  };
+
+  const handleChatToggle = () => {
+    setIsChatOpen(!isChatOpen);
   };
 
   const menuItems = [
@@ -104,9 +103,7 @@ function AppLayout() {
       <Box
         sx={{
           display: 'flex',
-          ...(!isMobile && {
-            margin: '100px',
-          }),
+          // Removed fixed margin for non-mobile
         }}
       >
         <CssBaseline />
@@ -125,9 +122,16 @@ function AppLayout() {
                   <MenuIcon />
                 </IconButton>
               )}
-              <Typography variant="h6" noWrap component="div">
+              <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
                 NWAN Fire App
               </Typography>
+              <IconButton
+                color="inherit"
+                aria-label="toggle chat"
+                onClick={handleChatToggle}
+              >
+                <ChatIcon />
+              </IconButton>
             </Toolbar>
           </AppBarStyled>
         )}
@@ -166,20 +170,19 @@ function AppLayout() {
                 duration: theme.transitions.duration.enteringScreen,
               }),
               boxShadow: theme.shadows[4], // Card-like shadow
-              borderRadius: theme.shape.borderRadius, // Card-like rounded corners
               backgroundColor: theme.palette.background.paper, // Card background
-              position: 'relative', // Ensure it pushes content
+              position: 'fixed', // Ensure it pushes content
             },
           }}
-          variant="persistent" // Keep persistent to push content
+          variant={isMobile ? "temporary" : "persistent"} // Change variant based on mobile
           anchor="left"
           open={open}
           onClose={handleDrawerToggle}
         >
           <DrawerHeader>
-            <IconButton onClick={handleDrawerToggle}>
+            {isMobile && <IconButton onClick={handleDrawerToggle}>
               {open ? (theme.direction === 'ltr' ? <ChevronLeftIcon /> : <ChevronRightIcon />) : <MenuIcon />}
-            </IconButton>
+            </IconButton>}
           </DrawerHeader>
           <List>
             {menuItems.map((item) => (
@@ -191,7 +194,8 @@ function AppLayout() {
             ))}
           </List>
         </Drawer>
-        <Box sx={{ display: 'flex', flexGrow: 1 }}>
+
+        <Box sx={{ display: 'flex', flexGrow: 1,right:'350px' }}>
           <Main open={open} isMobile={isMobile}>
             <DrawerHeader /> {/* This pushes content below the AppBar */}
             <Routes>
@@ -201,9 +205,13 @@ function AppLayout() {
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </Main>
-          <Box sx={{ width: isMobile ? 0 : 300, flexShrink: 0, display: isMobile ? 'none' : 'block' }}>
-            <Chat />
-          </Box>
+          {/* Render Chat component as a sidebar on desktop, or as an overlay on mobile */}
+          {!isMobile && (
+            <Box sx={{ width: isChatOpen ? 350 : 0, flexShrink: 0, transition: 'width 0.3s' }}>
+              <Chat isOpen={true} onClose={handleChatToggle} isMobile={isMobile} />
+            </Box>
+          )}
+          {isMobile && <Chat isOpen={isChatOpen} onClose={handleChatToggle} isMobile={isMobile} />}
         </Box>
       </Box>
     </Router>

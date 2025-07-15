@@ -104,7 +104,7 @@ function Trend() {
     switch (agg) {
       case 'daily': return 'MMM dd';
       case 'weekly': return 'w, yyyy';
-      case 'monthly': return 'MMM yyyy';
+      case 'monthly': return 'MMM';
       case 'yearly': return 'yyyy';
       default: return 'MMM dd';
     }
@@ -127,7 +127,7 @@ function Trend() {
         </Typography>
 
         <Box sx={{ display: 'flex', gap: 2, mb: 2, alignItems: 'center', flexWrap: 'wrap' }}>
-          <FormControl sx={{ minWidth: 120 }}>
+          <FormControl>
             <InputLabel id="aggregation-label">Aggregation</InputLabel>
             <Select
               labelId="aggregation-label"
@@ -143,7 +143,7 @@ function Trend() {
             </Select>
           </FormControl>
 
-          <FormControl sx={{ minWidth: 120 }}>
+          <FormControl>
             <InputLabel id="period-label">Period</InputLabel>
             <Select
               labelId="period-label"
@@ -166,7 +166,7 @@ function Trend() {
                 label="From Date"
                 value={customStartDate}
                 onChange={(newValue) => setCustomStartDate(newValue)}
-                renderInput={(params) => <TextField {...params} sx={{ minWidth: 150 }} />}
+                renderInput={(params) => <TextField {...params} />}
                 maxDate={customEndDate ? min([customEndDate, now]) : now} // Prevent selecting a start date after the end date
               />
 
@@ -174,7 +174,7 @@ function Trend() {
                 label="To Date"
                 value={customEndDate}
                 onChange={(newValue) => setCustomEndDate(newValue)}
-                renderInput={(params) => <TextField {...params} sx={{ minWidth: 150 }} />}
+                renderInput={(params) => <TextField {...params} />}
                 minDate={customStartDate ? customStartDate : null} // Prevent selecting an end date before the start date
               />
             </>

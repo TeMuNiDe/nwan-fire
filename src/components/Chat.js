@@ -1,13 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Box, Typography, Paper, IconButton, TextField, Button, CircularProgress } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'; // Using this for collapse initially
-import ChatIcon from '@mui/icons-material/Chat'; // Icon for collapsed state
 import SendIcon from '@mui/icons-material/Send'; // Icon for send button
 import { useUser } from '../contexts/UserContext'; // Import useUser hook
 
-function Chat() {
-  const [isCollapsed, setIsCollapsed] = useState(false); // State for collapse
+function Chat({ isOpen, onClose, isMobile }) {
   const [messages, setMessages] = useState([]); // Stores chat messages
   const [inputMessage, setInputMessage] = useState(''); // Stores current input message
   const [loading, setLoading] = useState(false); // Loading state for AI response
@@ -24,19 +21,6 @@ function Chat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
-
-  const handleClose = () => {
-    // TODO: Implement close functionality
-    console.log('Close button clicked');
-  };
-
-  const handleCollapse = () => {
-    setIsCollapsed(true);
-  };
-
-  const handleExpand = () => {
-    setIsCollapsed(false);
-  };
 
   const handleSendMessage = async () => {
     if (inputMessage.trim() === '') return;
@@ -74,41 +58,28 @@ function Chat() {
     setConversationId(null); // Clear conversation ID when clearing chat
   };
 
-  if (isCollapsed) {
-    return (
-      <IconButton
-        sx={{
-          position: 'fixed',
-          bottom: 16,
-          left: 16, // Position at bottom left
-          zIndex: 1300, // Ensure it's above other content
-          bgcolor: 'primary.main',
-          color: 'white',
-          '&:hover': {
-            bgcolor: 'primary.dark',
-          },
-        }}
-        onClick={handleExpand}
-      >
-        <ChatIcon />
-      </IconButton>
-    );
-  }
+  if (!isOpen) return null; // Don't render anything if not open
 
   return (
     <Box sx={{
-      height: '100%',
+      height: isMobile ? '90vh' : '100vh', // 80% viewport height on mobile, 100% for desktop sidebar
+      width: isMobile ? '100vw' : '350px', // 90% width on mobile, 100% of parent Box on desktop
+      position: 'fixed',
+      right:'0%',
       display: 'flex',
       flexDirection: 'column',
       p: 2,
       bgcolor: '#f3e5f5', // Light purple background from image
       borderRadius: 2,
       boxShadow: 3,
-      width: 350, // Example width
-      position: 'fixed', // Position fixed for floating window
-      bottom: 16,
-      right: 16, // Position at bottom right initially, can adjust later
-      zIndex: 1200, // Ensure it's above most content
+      // Positioning for mobile overlay
+      ...(isMobile && {
+        position: 'fixed',
+        bottom: '1%',
+        right: '0%',
+        left: '0%',
+        zIndex: 1200,
+      }),
     }}>
       {/* Title Bar */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -116,15 +87,11 @@ function Chat() {
           AI Assitant
         </Typography>
         <Box>
-          <IconButton size="small" onClick={handleCollapse}>
-            <KeyboardArrowDownIcon />
-          </IconButton>
-          <IconButton size="small" onClick={handleClose}>
+          {isMobile && <IconButton size="small" onClick={onClose}>
             <CloseIcon />
-          </IconButton>
+          </IconButton>}
         </Box>
       </Box>
-
       {/* Chat Content Area */}
       <Paper elevation={0} sx={{ flexGrow: 1, p: 2, overflowY: 'auto', mb: 1, bgcolor: 'white' }}>
         {messages.length === 0 ? (
