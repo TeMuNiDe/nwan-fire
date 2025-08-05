@@ -6,6 +6,8 @@ import ConversationDb from '../models/ConversationDb.js';
 import Conversation from '../models/Conversation.js';
 import TransactionMappingDb from '../models/TransactionMappingDb.js';
 import TransactionMapping from '../models/TransactionMapping.js';
+import { addTransactionEmbedding } from '../models/VectorDB.js';
+import { generateEmbedding } from '../utils/embeddings.js';
 
 const chatRouter = express.Router();
 const conversationDb = new ConversationDb();
@@ -100,7 +102,8 @@ export default () => {
 
                                 When a user provides a message that appears to be a transaction, first call the \`classify_transaction\` tool.
                                 After receiving the classified transaction, review the output. If any required fields for adding a transaction (name, amount, date, description, category, source, target) are missing or unclear, you MUST ask the user for the missing information.
-                                Once all required details are confirmed, then call the \`add_user_transaction\` tool. Always confirm with the user before finalizing the addition of a new transaction.`,
+                                Once all required details are confirmed, then call the \`add_user_transaction\` tool. Always confirm with the user before finalizing the addition of a new transaction.
+                                If the user's message contains relative time notations such as 'today', 'yesterday', 'last month', etc., you must use the \`get_current_time\` tool to get the current date and time. Use this information to convert the relative time into an absolute date before using other tools.`,
             tools: [{
                 functionDeclarations: functionDeclarations
             }]
@@ -151,8 +154,10 @@ export default () => {
                                 const { transaction, originalMessage } = function_output.output;
                                 const id = null;
                                 const timestamp = transaction.date ? new Date(transaction.date).getTime() : new Date().getTime();
-                                const newMapping = new TransactionMapping({id, originalMessage, transaction, timestamp});
+                                const embedding = await generateEmbedding(originalMessage);
+                                const newMapping = new TransactionMapping({id, originalMessage, transaction, timestamp, embedding});
                                 await transactionMappingDb.postTransactionMapping(newMapping);
+                                await addTransactionEmbedding(newMapping.getId(), originalMessage);
                                 logger.log(`Transaction mapping saved: ${JSON.stringify(newMapping.toJSON())}`);
                             }
                         }

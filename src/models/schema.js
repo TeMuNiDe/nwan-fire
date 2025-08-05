@@ -180,11 +180,12 @@ module.exports = {
                         "type": "string" ,
                         "enum": ["income","expense","asset", "liability"]
                     },
-                    "target_id": { "type": "string" }
+                    "target_id": { "type": "string" },
+                    "is_transaction": { "type": "boolean" }
                 },
                 "required": [
                     "user", "date", "amount", "source", "source_id",
-                    "category", "name", "description", "target", "target_id"
+                    "category", "name", "description", "target", "target_id", "is_transaction"
                 ]
         }
     }

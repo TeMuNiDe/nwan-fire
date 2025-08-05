@@ -1,6 +1,7 @@
 import { Type } from "@google/genai";
 import schemas from "../models/schema.js";
 import axios from 'axios';
+import { searchSimilarTransactions } from '../models/VectorDB.js';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL; // Assuming your API server runs on port 3001
 
@@ -188,10 +189,28 @@ export const functionDeclarations = [
         },
         required: ["message", "userId"]
     }
+},
+{
+    name: "get_current_time",
+    description: "Get the current time in ISO Date string format. Use this tool to resolve any relative time notations in the message, ie today, yesterday, last month etc.",
+    parameters: {
+        type: Type.OBJECT,
+        properties: {},
+        required: []
+    }
 }
 ]
 
 export const functionCalls = {
+    get_current_time: async () => {
+        try {
+            const now = new Date();
+            return { success: true, output: now.toISOString() };
+        } catch (error) {
+            console.error('Error getting current time:', error.message);
+            return { success: false, error: { message: error.message } };
+        }
+    },
     get_user_details: async ({ userId, fields=null }) => {
         let params = null;
     try {
@@ -299,17 +318,25 @@ export const functionCalls = {
             return { success: false, error: error.response ? error.response.data : { message: error.message } };
         }
     },
-    classify_transaction: async ({ message, userId, userAssets, userLiabilities, transactionMappings, model }) => {
+    classify_transaction: async ({ message, userId, userAssets, userLiabilities, model }) => {
         const { GoogleGenAI } = await import('@google/genai');
         const gemini_api_key = process.env.GEMINI_API_KEY;
         const gemini_model = model || process.env.GEMINI_MODEL || 'gemini-2.5-flash';
         const ai = new GoogleGenAI({ apiKey: gemini_api_key });
 
+        // Search for similar transactions using LanceDB
+        const similarTransactions = await searchSimilarTransactions(message, 5, 0.8); // Limit to 5, min similarity 80%
+
         const systemInstruction = `You are a transaction classification agent. Your goal is to extract transaction details from a user's message and format them into a JSON object.
                                    You must adhere to the following JSON schema for the transaction object:
                                    ${JSON.stringify(schemas.properties.classified_transaction, null, 2)}
-                                   Populate as many fields as possible from the user's message. If a field cannot be determined with good accuracy, leave it as an empty string or null, depending on its type.
+                                   Populate as many fields as possible from the user's message. IF ANY FIELD CANNOT BE DETERMINED WITH HIGH ACCURACY, LEAVE IT AS AN EMPTY STRING OR NULL BASED ON ITS TYPE.
+                                   Do not use ambiguous words like 'Unknown', 'Miscellaneous', 'Other', etc. If a field's value cannot be determined from the message, it must be left empty.
+                                   IT IS VERY IMPORTANT THAT YOU DO NOT MAKE ANY ASSUMPTIONS ABOUT THE TRANSACTION DETAILS THAT ARE NOT EXPLICITLY MENTIONED IN THE USER'S MESSAGE.
+                                   If the message is not a transaction, set the 'is_transaction' field to false and leave all other fields empty.
+                                   ONLY PROCESS AS A TRANSACTION IF THE MESSAGE IS CLEAR THAT THE TRANSACTION HAS ALREADY OCCURED. DO NOT PROCESS FUTRE TRANSACTIONS OR TRANSACTIONS THAT ARE NOT CLEARLY STATED AS HAVING OCCURED.
                                    The 'user' field should always be '${userId}'. 
+                                   The 'name' field must be a short, descriptive name for the transaction. Try to derive it from references to previous transactions, if available. IF NO VALID ENGLISH NAME CAN BE DERIVED, LEAVE IT EMPTY.
                                    The 'description' field should be a brief description of the transaction containing ALL the information from the user's message.
                                    The 'date_string' field should date string in YYYY-MM-DD format. If not specified, leave empty.
                                    YOU MUST ASSUME THE DATES IN USERS MESSAGE ARE ALWAYS IN DD-MM-YYYY OR DD/MM/YYYY OR DD/MM FORMAT. and treat them as such. ie. 09-07-2025 MUST BE UNDERSTOOD AS 9th Of July, 2025. KEEP THIS IN MIND WHILE DETERMINING 'date' FIELD
@@ -318,8 +345,9 @@ export const functionCalls = {
                                    Here is additional context about the user's financial data to help with classification:
                                    User Assets: ${userAssets}
                                    User Liabilities: ${userLiabilities}
-                                   Past Transaction Mappings (original message to classified transaction): ${transactionMappings}
-                                   The 'source_id' and 'target_id' fields are only required if 'source' or 'target' is 'asset' or 'liability' respectively.
+                                   Past Transaction Mappings (original message to classified transaction, filtered by similarity): ${JSON.stringify(similarTransactions.map(m => ({ originalMessage: m.originalMessage, transaction: m.transaction })), null, 2)}
+                                   YOU SHOULD ONLY USE THE INFORMATION IN PAST TRANSACTION MAPPINGS FOR DETERMINING THE CATEGORY BASED ON RECIPIENT OR NAME OF THE TRANSACTION. DO NOT USE IT FOR ANY OTHER FIELDS.
+                                   The 'source_id' and 'target_id' fields are only and must be required if 'source' or 'target' is 'asset' or 'liability' respectively.
                                    THE SOURCE_ID AND TARGET_ID MUST BE MATCHING WITH _ID FIELD OF THE ASSET OR LIABILITY Objects ASSOCIATED WITH THE TRANSACTION, IF APPLICABLE.  
                                    Analyze the user's message and the provided context to accurately classify the transaction.
                                    Return only the JSON object. Do not include any other text or explanation.`;
@@ -328,6 +356,7 @@ export const functionCalls = {
                 model: gemini_model,
                 contents: [{ role: "user", parts: [{ text: message }] }],
                 config:{
+                temperature:0.0,
                 systemInstruction: systemInstruction,
                 responseMimeType: "application/json",
                 responseSchema: schemas.properties.classified_transaction

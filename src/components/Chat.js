@@ -28,6 +28,7 @@ function Chat({ isOpen, onClose, isMobile }) {
     const userMessage = { sender: 'user', text: inputMessage };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     setInputMessage('');
+    
     setLoading(true);
     try {
       const response = await fetch(`${REACT_APP_CHAT_URL}`, {
